@@ -1,0 +1,225 @@
+// Class to setup a TableModel for records in editors
+
+package boeken.gui;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.table.*;
+import java.text.*;
+import java.util.*;
+import java.util.logging.*;
+import java.util.regex.*;
+
+
+public class EditorsTableModel extends AbstractTableModel {
+    final Logger logger = Logger.getLogger( "boeken.gui.EditorsTableModel" );
+
+    private Connection connection;
+    private String[ ] headings = { "Id", "Editors", "Persoon" };
+
+    class EditorsRecord {
+	String  editorsString;
+	String  persoonString;
+	int	editorsId;
+	int	persoonId;
+
+	public EditorsRecord( String  editorsString,
+			      String  persoonString,
+			      int     editorsId,
+			      int    persoonId ) {
+	    this.editorsString = editorsString;
+	    this.persoonString = persoonString;
+	    this.editorsId = editorsId;
+	    this.persoonId = persoonId;
+	}
+    }
+
+    ArrayList editorsRecordList = new ArrayList( 20 );
+
+    // Pattern to find a single quote in the titel, to be replaced
+    // with escaped quote (the double slashes are really necessary)
+    final Pattern quotePattern = Pattern.compile( "\\'" );
+
+
+    // Constructor
+    public EditorsTableModel( Connection connection ) {
+	this.connection = connection;
+
+	setupEditorsTableModel( null );
+    }
+
+    public void setupEditorsTableModel( String editorsFilterString ) {
+
+	// Setup the table
+	try {
+	    String editorsQueryString =
+		"SELECT editors.editors, persoon.persoon, " +
+		"editors.editors_id, editors_persoon.persoon_id " +
+		"FROM editors " +
+		"LEFT JOIN editors_persoon ON editors_persoon.editors_id = editors.editors_id " +
+		"LEFT JOIN persoon ON persoon.persoon_id = editors_persoon.persoon_id ";
+
+	    if ( ( editorsFilterString != null ) && ( editorsFilterString.length( ) > 0 ) ) {
+		// Matcher to find single quotes in editorsFilterString, in order to replace these
+		// with escaped quotes (the quadruple slashes are really necessary)
+		Matcher quoteMatcher = quotePattern.matcher( editorsFilterString );
+		editorsQueryString +=
+		    "WHERE editors.editors LIKE \"%" + quoteMatcher.replaceAll( "\\\\'" )  + "%\" ";
+	    }
+
+	    editorsQueryString += "ORDER BY persoon.persoon";
+
+	    Statement statement = connection.createStatement( );
+	    ResultSet resultSet = statement.executeQuery( editorsQueryString );
+
+	    // Clear the list
+	    editorsRecordList.clear( );
+
+	    // Add all query results to the list
+	    while ( resultSet.next( ) ) {
+		editorsRecordList.add( new EditorsRecord( resultSet.getString( 1 ),
+							  resultSet.getString( 2 ),
+							  resultSet.getInt( 3 ),
+							  resultSet.getInt( 4 ) ) );
+	    }
+
+	    editorsRecordList.trimToSize( );
+
+	    // Trigger update of table data
+	    fireTableDataChanged( );
+	} catch ( SQLException sqlException ) {
+	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
+	}
+    }
+
+    public int getRowCount( ) { return editorsRecordList.size( ); }
+
+    public int getColumnCount( ) { return 3; }
+
+    public Class getColumnClass( int column ) {
+	switch ( column ) {
+	case 0: // Id
+	    return Integer.class;
+	}
+	return String.class;
+    }
+
+    public boolean isCellEditable( int row, int column ) {
+	switch ( column ) {
+	case 0: // Id
+	case 2: // Persoon
+	    // Do not allow editing
+	    return false;
+	}
+	return true;
+    }
+
+    public Object getValueAt( int row, int column ) {
+	if ( ( row < 0 ) || ( row >= editorsRecordList.size( ) ) ) {
+	    logger.severe( "Invalid row: " + row );
+	    return null;
+	}
+
+	final EditorsRecord editorsRecord =
+	    ( EditorsRecord )editorsRecordList.get( row );
+
+	if ( column == 0 ) return new Integer( editorsRecord.editorsId );
+	if ( column == 1 ) return editorsRecord.editorsString;
+	if ( column == 2 ) return editorsRecord.persoonString;
+
+	return "";
+    }
+
+    public String getColumnName( int column ) {
+	return headings[ column ];
+    }
+
+    public void setValueAt( Object object, int row, int column ) {
+	if ( ( row < 0 ) || ( row >= editorsRecordList.size( ) ) ) {
+	    logger.severe( "Invalid row: " + row );
+	    return;
+	}
+
+	final EditorsRecord editorsRecord =
+	    ( EditorsRecord )editorsRecordList.get( row );
+
+	String updateString = null;
+
+	try {
+	    switch ( column ) {
+	    case 1:
+		String editorsString = ( String )object;
+		if ( ( ( editorsString == null ) || ( editorsString.length( ) == 0 ) ) &&
+		     ( editorsRecord.editorsString != null ) &&
+		     ( editorsRecord.editorsString.length( ) != 0 ) ) {
+		    updateString = "editors = NULL ";
+		    editorsRecord.editorsString = editorsString;
+		} else if ( ( editorsString != null ) &&
+			    ( !editorsString.equals( editorsRecord.editorsString ) ) ) {
+		    // Matcher to find single quotes in editors, in order to replace these
+		    // with escaped quotes (the quadruple slashes are really necessary)
+		    final Matcher quoteMatcher = quotePattern.matcher( editorsString );
+		    updateString = "editors = '" + quoteMatcher.replaceAll( "\\\\'" ) + "'";
+		    editorsRecord.editorsString = editorsString;
+		}
+
+		break;
+
+	    default:
+		logger.severe( "Invalid column: " + column );
+		return;
+	    }
+	} catch ( Exception exception ) {
+	    logger.severe( "could not get value from " +
+			   object + " for column " + column + " in row " + row );
+	    return;
+	}
+
+	// Check if update is not necessary
+	if ( updateString == null ) return;
+
+	updateString = ( "UPDATE editors SET " + updateString +
+			 " WHERE editors_id = " + editorsRecord.editorsId );
+	logger.info( "updateString: " + updateString );
+
+	try {
+	    Statement statement = connection.createStatement( );
+	    int nUpdate = statement.executeUpdate( updateString );
+	    if ( nUpdate != 1 ) {
+		logger.severe( "Could not update record with editors_id " + editorsRecord.editorsId +
+			       " in editors, nUpdate = " + nUpdate );
+		return;
+	    }
+	} catch ( SQLException sqlException ) {
+	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
+	    return;
+	}
+
+	// Store record in list
+	editorsRecordList.set( row, editorsRecord );
+
+	fireTableCellUpdated( row, column );
+    }
+
+    public int getEditorsId( int row ) {
+	final EditorsRecord editorsRecord =
+	    ( EditorsRecord )editorsRecordList.get( row );
+
+	return editorsRecord.editorsId;
+    }
+
+    public String getEditorsString( int row ) {
+	if ( ( row < 0 ) || ( row >= editorsRecordList.size( ) ) ) {
+	    logger.severe( "Invalid row: " + row );
+	    return null;
+	}
+
+	return ( ( EditorsRecord )editorsRecordList.get( row ) ).editorsString;
+    }
+}
