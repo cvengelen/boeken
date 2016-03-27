@@ -19,7 +19,7 @@
     <target name="compile" description="compile the source" depends="init">
         <!-- Compile the java code -->
         <javac srcdir="." destdir="${build.src}"
-               classpath="/Users/cvengelen/java/table/target"
+               classpath="${java.libs}/table.jar"
                includeAntRuntime="false"
                listfiles="true"/>
     </target>
