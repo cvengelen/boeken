@@ -1,54 +1,50 @@
 // Class to setup a TableModel for records in label
 
-package boeken.gui;
+package boeken.label;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
 import javax.swing.table.*;
-import java.text.*;
 import java.util.*;
 import java.util.logging.*;
 import java.util.regex.*;
 
 
-public class LabelTableModel extends AbstractTableModel {
-    final Logger logger = Logger.getLogger( "boeken.gui.LabelTableModel" );
+class LabelTableModel extends AbstractTableModel {
+    private final Logger logger = Logger.getLogger( LabelTableModel.class.getCanonicalName() );
 
     private Connection connection;
-    private String[ ] headings = { "Id", "Label" };
+    private final String[ ] headings = { "Id", "Label" };
 
-    class LabelRecord {
+    private class LabelRecord {
 	int	labelId;
 	String  labelString;
 
-	public LabelRecord( int     labelId,
-			    String  labelString ) {
+	LabelRecord( int     labelId,
+                     String  labelString ) {
 	    this.labelId = labelId;
 	    this.labelString = labelString;
 	}
     }
 
-    ArrayList labelRecordList = new ArrayList( 200 );
+    private final ArrayList<LabelRecord> labelRecordList = new ArrayList<>( 200 );
 
     // Pattern to find a single quote in the titel, to be replaced
     // with escaped quote (the double slashes are really necessary)
-    final Pattern quotePattern = Pattern.compile( "\\'" );
+    private final Pattern quotePattern = Pattern.compile( "\\'" );
 
 
     // Constructor
-    public LabelTableModel( Connection connection ) {
+    LabelTableModel( Connection connection ) {
 	this.connection = connection;
 
 	setupLabelTableModel( null );
     }
 
-    public void setupLabelTableModel( String labelFilterString ) {
+    void setupLabelTableModel( String labelFilterString ) {
 
 	// Setup the table
 	try {
@@ -113,10 +109,9 @@ public class LabelTableModel extends AbstractTableModel {
 	    return null;
 	}
 
-	final LabelRecord labelRecord =
-	    ( LabelRecord )labelRecordList.get( row );
+	final LabelRecord labelRecord = labelRecordList.get( row );
 
-	if ( column == 0 ) return new Integer( labelRecord.labelId );
+	if ( column == 0 ) return labelRecord.labelId;
 	if ( column == 1 ) return labelRecord.labelString;
 
 	return "";
@@ -128,8 +123,7 @@ public class LabelTableModel extends AbstractTableModel {
 	    return;
 	}
 
-	final LabelRecord labelRecord =
-	    ( LabelRecord )labelRecordList.get( row );
+	final LabelRecord labelRecord = labelRecordList.get( row );
 
 	String updateString = null;
 
@@ -192,21 +186,23 @@ public class LabelTableModel extends AbstractTableModel {
 	return headings[ column ];
     }
 
-    public int getNumberOfRecords( ) { return labelRecordList.size( ); }
+    int getNumberOfRecords( ) { return labelRecordList.size( ); }
 
-    public int getLabelId( int row ) {
-	final LabelRecord labelRecord =
-	    ( LabelRecord )labelRecordList.get( row );
+    int getLabelId( int row ) {
+        if ( ( row < 0 ) || ( row >= labelRecordList.size( ) ) ) {
+            logger.severe( "Invalid row: " + row );
+            return 0;
+        }
 
-	return labelRecord.labelId;
+	return (labelRecordList.get( row )).labelId;
     }
 
-    public String getLabelString( int row ) {
+    String getLabelString( int row ) {
 	if ( ( row < 0 ) || ( row >= labelRecordList.size( ) ) ) {
 	    logger.severe( "Invalid row: " + row );
 	    return null;
 	}
 
-	return ( ( LabelRecord )labelRecordList.get( row ) ).labelString;
+	return ( labelRecordList.get( row ) ).labelString;
     }
 }

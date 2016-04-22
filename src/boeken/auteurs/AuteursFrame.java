@@ -1,48 +1,45 @@
 // frame to show and select records from auteurs
 
-package boeken.gui;
+package boeken.auteurs;
 
-import java.sql.Connection; 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*; 
+import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.table.*;
 import javax.swing.event.*;
 
-import java.util.*;
 import java.util.logging.*;
 
+import boeken.gui.EditAuteursDialog;
 import table.*;
 
 
-public class AuteursFrame {
-    final Logger logger = Logger.getLogger( "boeken.gui.AuteursFrame" );
+class AuteursFrame {
+    private final Logger logger = Logger.getLogger(AuteursFrame.class.getCanonicalName());
 
-    final Connection connection;
-    final JFrame frame = new JFrame( "Auteurs" );
+    private final Connection connection;
+    private final JFrame frame = new JFrame( "Auteurs" );
 
-    JTextField auteursFilterTextField;
+    private JTextField auteursFilterTextField;
 
-    AuteursTableModel auteursTableModel;
-    TableSorter auteursTableSorter;
-    JTable auteursTable;
+    private AuteursTableModel auteursTableModel;
+    private TableSorter auteursTableSorter;
 
-
-    class Auteurs {
+    private class Auteurs {
 	int	id;
 	String  string;
 
-	public Auteurs( int    id,
-			String string ) {
+	Auteurs( int    id,
+                 String string ) {
 	    this.id = id;
 	    this.string = string;
 	}
 
-	public boolean presentInTable( String tableString ) {
+	boolean presentInTable( String tableString ) {
 	    // Check if auteursId is present in table
 	    try {
 		Statement statement = connection.createStatement( );
@@ -64,8 +61,7 @@ public class AuteursFrame {
 	}
     }
 
-
-    public AuteursFrame( final Connection connection ) {
+    AuteursFrame( final Connection connection ) {
 	this.connection = connection;
 
 	// put the controls the content pane
@@ -74,47 +70,54 @@ public class AuteursFrame {
 	// Set grid bag layout manager
 	container.setLayout( new GridBagLayout( ) );
 	GridBagConstraints constraints = new GridBagConstraints( );
-	constraints.anchor = GridBagConstraints.WEST;
-	constraints.insets = new Insets( 0, 0, 10, 10 );
 
-	constraints.gridx = 0;
+	constraints.insets = new Insets( 20, 20, 5, 5 );
+        constraints.gridx = 0;
 	constraints.gridy = 0;
+        constraints.weightx = 0d;
+        constraints.weighty = 0d;
 	constraints.gridwidth = 1;
+        constraints.anchor = GridBagConstraints.EAST;
 	container.add( new JLabel( "Auteurs Filter:" ), constraints );
 	auteursFilterTextField = new JTextField( 20 );
 
+        constraints.insets = new Insets( 20, 5, 5, 40 );
 	constraints.gridx = GridBagConstraints.RELATIVE;
+        constraints.anchor = GridBagConstraints.WEST;
+        constraints.weightx = 1d;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
 	container.add( auteursFilterTextField, constraints );
 
-	class AuteursFilterActionListener implements ActionListener {
-	    public void actionPerformed( ActionEvent actionEvent ) {
-		// Setup the auteurs table
-		auteursTableModel.setupAuteursTableModel( auteursFilterTextField.getText( ) );
-	    }
-	}
-	auteursFilterTextField.addActionListener( new AuteursFilterActionListener( ) );
-
+        auteursFilterTextField.addActionListener( ( ActionEvent actionEvent ) -> {
+            auteursTableSorter.clearSortingState();
+            // Setup the auteurs table when the auteurs field is modified
+            auteursTableModel.setupAuteursTableModel( auteursFilterTextField.getText() );
+        } );
 
 	// Create auteurs table from title table model
 	auteursTableModel = new AuteursTableModel( connection );
 	auteursTableSorter = new TableSorter( auteursTableModel );
-	auteursTable = new JTable( auteursTableSorter );
+	JTable auteursTable = new JTable( auteursTableSorter );
 	auteursTableSorter.setTableHeader( auteursTable.getTableHeader( ) );
 	// auteursTableSorter.setSortingStatus( 0, TableSorter.DESCENDING );
 
 	auteursTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
 
 	auteursTable.getColumnModel( ).getColumn( 0 ).setPreferredWidth(  50 );  // id
-	auteursTable.getColumnModel( ).getColumn( 1 ).setPreferredWidth( 200 );  // auteurs
-	auteursTable.getColumnModel( ).getColumn( 2 ).setPreferredWidth( 150 );  // persoon
+	auteursTable.getColumnModel( ).getColumn( 1 ).setPreferredWidth( 250 );  // auteurs
+	auteursTable.getColumnModel( ).getColumn( 2 ).setPreferredWidth( 200 );  // persoon
 
 	// Set vertical size just enough for 20 entries
-	auteursTable.setPreferredScrollableViewportSize( new Dimension( 400, 320 ) );
+	auteursTable.setPreferredScrollableViewportSize( new Dimension( 500, 320 ) );
 
+        constraints.insets = new Insets( 5, 20, 5, 20 );
 	constraints.gridx = 0;
-	constraints.gridy = 4;
-	constraints.gridwidth = 5;
-	constraints.insets = new Insets( 10, 0, 10, 10 );
+	constraints.gridy = 1;
+	constraints.gridwidth = 2;
+        // Setting weighty and fill is necessary for proper filling the frame when resized.
+        constraints.weightx = 1d;
+        constraints.weighty = 1d;
+        constraints.fill = GridBagConstraints.BOTH;
 	constraints.anchor = GridBagConstraints.CENTER;
 	container.add( new JScrollPane( auteursTable ), constraints );
 
@@ -127,7 +130,7 @@ public class AuteursFrame {
 	final ListSelectionModel auteursListSelectionModel = auteursTable.getSelectionModel( );
 
 	class AuteursListSelectionListener implements ListSelectionListener {
-	    int selectedRow = -1;
+	    private int selectedRow = -1;
 
 	    public void valueChanged( ListSelectionEvent listSelectionEvent ) {
 		// Ignore extra messages.
@@ -147,7 +150,7 @@ public class AuteursFrame {
 		deleteAuteursButton.setEnabled( true );
 	    }
 
-	    public int getSelectedRow ( ) { return selectedRow; }
+	    int getSelectedRow ( ) { return selectedRow; }
 	}
 
 	// Add auteursListSelectionListener object to the selection model of the musici table
@@ -162,9 +165,8 @@ public class AuteursFrame {
 		    System.exit( 0 );
 		} else if ( actionEvent.getActionCommand( ).equals( "insert" ) ) {
 		    // Insert new auteurs record
-		    EditAuteursDialog editAuteursDialog =
-			new EditAuteursDialog( connection, frame,
-					       auteursFilterTextField.getText( ) );
+		    new EditAuteursDialog( connection, frame,
+                                           auteursFilterTextField.getText( ) );
 		} else {
 		    int selectedRow = auteursListSelectionListener.getSelectedRow( );
 		    if ( selectedRow < 0 ) {
@@ -175,7 +177,7 @@ public class AuteursFrame {
 			return;
 		    }
 
-		    // Get the selected auteurs id 
+		    // Get the selected auteurs id
 		    int selectedAuteursId = auteursTableModel.getAuteursId( selectedRow );
 
 		    // Check if auteurs has been selected
@@ -189,8 +191,7 @@ public class AuteursFrame {
 
 		    if ( actionEvent.getActionCommand( ).equals( "edit" ) ) {
 			// Do dialog
-			EditAuteursDialog editAuteursDialog =
-			    new EditAuteursDialog( connection, frame, selectedAuteursId );
+			new EditAuteursDialog( connection, frame, selectedAuteursId );
 		    } else if ( actionEvent.getActionCommand( ).equals( "delete" ) ) {
 			final Auteurs auteurs = new Auteurs( auteursTableModel.getAuteursId( selectedRow ),
 							     auteursTableModel.getAuteursString( selectedRow ) );
@@ -271,14 +272,17 @@ public class AuteursFrame {
 	closeButton.addActionListener( buttonActionListener );
 	buttonPanel.add( closeButton );
 
+        constraints.insets = new Insets( 5, 20, 20, 20 );
 	constraints.gridx = 0;
-	constraints.gridy = 5;
-	constraints.gridwidth = 3;
-	constraints.insets = new Insets( 10, 0, 0, 10 );
+	constraints.gridy = 2;
+	constraints.gridwidth = 2;
+        constraints.weightx = 0d;
+        constraints.weighty = 0d;
+        constraints.fill = GridBagConstraints.NONE;
 	constraints.anchor = GridBagConstraints.CENTER;
 	container.add( buttonPanel, constraints );
 
-	frame.setSize( 600, 500 );
+	frame.setSize( 560, 500 );
 	frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 	frame.setVisible(true);
     }

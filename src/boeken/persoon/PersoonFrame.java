@@ -1,45 +1,42 @@
 // frame to show and select records from persoon
 
-package boeken.gui;
+package boeken.persoon;
 
-import java.sql.Connection; 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*; 
+import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.table.*;
 import javax.swing.event.*;
 
-import java.util.*;
 import java.util.logging.*;
 
 import table.*;
 
 
-public class PersoonFrame {
-    final Logger logger = Logger.getLogger( "boeken.gui.PersoonFrame" );
+class PersoonFrame {
+    private final Logger logger = Logger.getLogger( PersoonFrame.class.getCanonicalName() );
 
-    final Connection connection;
-    final JFrame frame = new JFrame( "Persoon" );
+    private final Connection connection;
+    private final JFrame frame = new JFrame( "Persoon" );
 
-    PersoonTableModel persoonTableModel;
-    TableSorter persoonTableSorter;
-    JTable persoonTable;
+    private PersoonTableModel persoonTableModel;
+    private TableSorter persoonTableSorter;
 
-    class Persoon {
+    private class Persoon {
 	int	id;
 	String  name;
 
-	public Persoon( int    id,
-			String name ) {
+	Persoon( int    id,
+                 String name ) {
 	    this.id = id;
 	    this.name = name;
 	}
 
-	public boolean presentInTable( String tableString ) {
+	boolean presentInTable( String tableString ) {
 	    // Check if persoonId is present in table
 	    try {
 		Statement statement = connection.createStatement( );
@@ -62,7 +59,7 @@ public class PersoonFrame {
     }
 
 
-    public PersoonFrame( final Connection connection ) {
+    PersoonFrame( final Connection connection ) {
 	this.connection = connection;
 
 	// put the controls the content pane
@@ -71,31 +68,33 @@ public class PersoonFrame {
 	// Set grid bag layout manager
 	container.setLayout( new GridBagLayout( ) );
 	GridBagConstraints constraints = new GridBagConstraints( );
-	constraints.anchor = GridBagConstraints.WEST;
 	constraints.insets = new Insets( 0, 0, 10, 10 );
 
+        constraints.insets = new Insets( 20, 20, 5, 5 );
 	constraints.gridx = 0;
 	constraints.gridy = 0;
 	constraints.gridwidth = 1;
+        constraints.anchor = GridBagConstraints.EAST;
 	container.add( new JLabel( "Persoon Filter:" ), constraints );
 	final JTextField persoonFilterTextField = new JTextField( 15 );
 
+        constraints.insets = new Insets( 20, 5, 5, 40 );
 	constraints.gridx = GridBagConstraints.RELATIVE;
+        constraints.anchor = GridBagConstraints.WEST;
+        constraints.weightx = 1d;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
 	container.add( persoonFilterTextField, constraints );
 
-	class PersoonFilterActionListener implements ActionListener {
-	    public void actionPerformed( ActionEvent actionEvent ) {
-		// Setup the persoon table
-		persoonTableModel.setupPersoonTableModel( persoonFilterTextField.getText( ) );
-	    }
-	}
-	persoonFilterTextField.addActionListener( new PersoonFilterActionListener( ) );
+	persoonFilterTextField.addActionListener(  ( ActionEvent actionEvent ) -> {
+            persoonTableSorter.clearSortingState();
+            // Setup the persoon table
+            persoonTableModel.setupPersoonTableModel( persoonFilterTextField.getText() );
+        } );
 
-
-	// Create persoon table from title table model
+        // Create persoon table from title table model
 	persoonTableModel = new PersoonTableModel( connection );
 	persoonTableSorter = new TableSorter( persoonTableModel );
-	persoonTable = new JTable( persoonTableSorter );
+	final JTable persoonTable = new JTable( persoonTableSorter );
 	persoonTableSorter.setTableHeader( persoonTable.getTableHeader( ) );
 	// persoonTableSorter.setSortingStatus( 0, TableSorter.DESCENDING );
 
@@ -107,10 +106,13 @@ public class PersoonFrame {
 	// Set vertical size just enough for 20 entries
 	persoonTable.setPreferredScrollableViewportSize( new Dimension( 300, 320 ) );
 
+        constraints.insets = new Insets( 5, 20, 5, 20 );
 	constraints.gridx = 0;
-	constraints.gridy = 4;
-	constraints.gridwidth = 5;
-	constraints.insets = new Insets( 10, 0, 10, 10 );
+	constraints.gridy = 1;
+	constraints.gridwidth = 2;
+        constraints.weightx = 1d;
+        constraints.weighty = 1d;
+        constraints.fill = GridBagConstraints.BOTH;
 	constraints.anchor = GridBagConstraints.CENTER;
 	container.add( new JScrollPane( persoonTable ), constraints );
 
@@ -126,7 +128,7 @@ public class PersoonFrame {
 	final ListSelectionModel persoonListSelectionModel = persoonTable.getSelectionModel( );
 
 	class PersoonListSelectionListener implements ListSelectionListener {
-	    int selectedRow = -1;
+	    private int selectedRow = -1;
 
 	    public void valueChanged( ListSelectionEvent listSelectionEvent ) {
 		// Ignore extra messages.
@@ -144,7 +146,7 @@ public class PersoonFrame {
 		deletePersoonButton.setEnabled( true );
 	    }
 
-	    public int getSelectedRow ( ) { return selectedRow; }
+	    int getSelectedRow ( ) { return selectedRow; }
 	}
 
 	// Add persoonListSelectionListener object to the selection model of the musici table
@@ -187,7 +189,7 @@ public class PersoonFrame {
 			return;
 		    }
 
-		    // Get the selected persoon id 
+		    // Get the selected persoon id
 		    int selectedPersoonId = persoonTableModel.getPersoonId( selectedRow );
 
 		    // Check if persoon has been selected
@@ -272,14 +274,15 @@ public class PersoonFrame {
 	closeButton.addActionListener( buttonActionListener );
 	buttonPanel.add( closeButton );
 
-	constraints.gridx = 0;
-	constraints.gridy = 5;
-	constraints.gridwidth = 3;
-	constraints.insets = new Insets( 10, 0, 0, 10 );
-	constraints.anchor = GridBagConstraints.CENTER;
+        constraints.insets = new Insets( 5, 20, 20, 20 );
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        constraints.weightx = 0d;
+        constraints.weighty = 0d;
+        constraints.fill = GridBagConstraints.NONE;
 	container.add( buttonPanel, constraints );
 
-	frame.setSize( 400, 500 );
+	frame.setSize( 360, 500 );
 	frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 	frame.setVisible(true);
     }

@@ -1,14 +1,17 @@
 // Class to setup a TableModel for records in boek
 
-package boeken.gui;
+package boeken.boek;
+
+import boeken.gui.LabelComboBox;
+import boeken.gui.StatusComboBox;
+import boeken.gui.TypeComboBox;
+import boeken.gui.UitgeverComboBox;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.text.*;
@@ -17,17 +20,17 @@ import java.util.logging.*;
 import java.util.regex.*;
 
 
-public class BoekTableModel extends AbstractTableModel {
-    final Logger logger = Logger.getLogger( "boeken.gui.BoekTableModel" );
+class BoekTableModel extends AbstractTableModel {
+    private final Logger logger = Logger.getLogger( "boeken.boek.BoekTableModel" );
 
     private Connection connection;
-    private String[ ] headings = { "Id", "Boek", "Type",
-				   "Uitgever", "ISBN-3", "ISBN-4",
-				   "Status", "Label", "Aanschafdatum", "Verwijderd" };
+    private final String[ ] headings = { "Id", "Boek", "Type",
+                                         "Uitgever", "ISBN-3", "ISBN-4",
+                                         "Status", "Label", "Aanschafdatum", "Verwijderd" };
 
-    final SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
 
-    class BoekRecord {
+    private class BoekRecord {
 	int	boekId;
 	String	boekString;
 	int	typeId;
@@ -43,20 +46,20 @@ public class BoekTableModel extends AbstractTableModel {
 	Date	aanschafDate;
 	Date    verwijderdDate;
 
-	public BoekRecord( int     boekId,
-			   String  boekString,
-			   int     typeId,
-			   String  typeString,
-			   int     uitgeverId,
-			   String  uitgeverIsbn1Isbn2String,
-			   String  isbn3String,
-			   String  isbn4String,
-			   int     statusId,
-			   String  statusString,
-			   int     labelId,
-			   String  labelString,
-			   Date    aanschafDate,
-			   Date    verwijderdDate ) {
+	BoekRecord( int     boekId,
+                    String  boekString,
+                    int     typeId,
+                    String  typeString,
+                    int     uitgeverId,
+                    String  uitgeverIsbn1Isbn2String,
+                    String  isbn3String,
+                    String  isbn4String,
+                    int     statusId,
+                    String  statusString,
+                    int     labelId,
+                    String  labelString,
+                    Date    aanschafDate,
+                    Date    verwijderdDate ) {
 	    this.boekId = boekId;
 	    this.boekString = boekString;
 	    this.typeId = typeId;
@@ -74,7 +77,7 @@ public class BoekTableModel extends AbstractTableModel {
 	}
 
 	// Copy constructor
-	public BoekRecord( BoekRecord boekRecord ) {
+	BoekRecord( BoekRecord boekRecord ) {
 	    this.boekId = boekRecord.boekId;
 	    this.boekString = boekRecord.boekString;
 	    this.typeId = boekRecord.typeId;
@@ -92,30 +95,30 @@ public class BoekTableModel extends AbstractTableModel {
 	}
     }
 
-    ArrayList boekRecordList = new ArrayList( 800 );
+    private final ArrayList<BoekRecord> boekRecordList = new ArrayList<>( 800 );
 
-    TypeComboBox typeComboBox;
-    UitgeverComboBox uitgeverComboBox;
-    StatusComboBox statusComboBox;
-    LabelComboBox labelComboBox;
+    private TypeComboBox typeComboBox;
+    private UitgeverComboBox uitgeverComboBox;
+    private StatusComboBox statusComboBox;
+    private LabelComboBox labelComboBox;
 
-    JButton cancelBoekButton;
-    JButton saveBoekButton;
+    private JButton cancelBoekButton;
+    private JButton saveBoekButton;
 
-    boolean	rowModified = false;
-    int		editRow = -1;
-    BoekRecord	boekRecord = null;
-    BoekRecord	originalBoekRecord = null;
+    private boolean	rowModified = false;
+    private int		editRow = -1;
+    private BoekRecord	boekRecord = null;
+    private BoekRecord	originalBoekRecord = null;
 
     // Pattern to find a single quote, to be replaced with
     // escaped quote (the double slashes are really necessary)
-    final Pattern quotePattern = Pattern.compile( "\\'" );
+    private final Pattern quotePattern = Pattern.compile( "\\'" );
 
 
     // Constructor
-    public BoekTableModel( final Connection connection,
-			   final JButton    cancelBoekButton,
-			   final JButton    saveBoekButton ) {
+    BoekTableModel( final Connection connection,
+                    final JButton    cancelBoekButton,
+                    final JButton    saveBoekButton ) {
 	this.connection = connection;
 	this.cancelBoekButton = cancelBoekButton;
 	this.saveBoekButton = saveBoekButton;
@@ -129,10 +132,10 @@ public class BoekTableModel extends AbstractTableModel {
 	setupBoekTableModel( null, 0, 0, 0 );
     }
 
-    public void setupBoekTableModel( String boekFilterString,
-				     int    typeId,
-				     int    uitgeverId,
-				     int    statusId ) {
+    void setupBoekTableModel( String boekFilterString,
+                              int    typeId,
+                              int    uitgeverId,
+                              int    statusId ) {
 	// Setup the table
 	try {
 	    String boekQueryString =
@@ -289,10 +292,9 @@ public class BoekTableModel extends AbstractTableModel {
 	    return null;
 	}
 
-	final BoekRecord boekRecord =
-	    ( BoekRecord )boekRecordList.get( row );
+	final BoekRecord boekRecord = boekRecordList.get( row );
 
-	if ( column == 0 ) return new Integer( boekRecord.boekId );
+	if ( column == 0 ) return boekRecord.boekId;
 	if ( column == 1 ) return boekRecord.boekString;
 	if ( column == 2 ) return boekRecord.typeString;
 	if ( column == 3 ) return boekRecord.uitgeverIsbn1Isbn2String;
@@ -498,28 +500,29 @@ public class BoekTableModel extends AbstractTableModel {
 	return headings[ column ];
     }
 
-    public int getNumberOfRecords( ) { return boekRecordList.size( ); }
+    int getNumberOfRecords( ) { return boekRecordList.size( ); }
 
-    public int getBoekId( int row ) {
-	final BoekRecord boekRecord =
-	    ( BoekRecord )boekRecordList.get( row );
+    int getBoekId( int row ) {
+        if ( ( row < 0 ) || ( row >= boekRecordList.size( ) ) ) {
+            logger.severe( "Invalid row: " + row );
+            return 0;
+        }
 
-	return boekRecord.boekId;
+	return (boekRecordList.get( row )).boekId;
     }
 
-    public String getBoekString( int row ) {
+    String getBoekString( int row ) {
 	if ( ( row < 0 ) || ( row >= boekRecordList.size( ) ) ) {
 	    logger.severe( "Invalid row: " + row );
 	    return null;
 	}
 
-	return ( ( BoekRecord )boekRecordList.get( row ) ).boekString;
+	return ( boekRecordList.get( row ) ).boekString;
     }
 
-
-    public void setEditRow( int editRow ) {
+    void setEditRow( int editRow ) {
 	// Initialize record to be edited
-	boekRecord = ( BoekRecord )boekRecordList.get( editRow );
+	boekRecord = boekRecordList.get( editRow );
 
 	// Copy record to use as key in table update
 	originalBoekRecord = new BoekRecord( boekRecord );
@@ -531,11 +534,11 @@ public class BoekTableModel extends AbstractTableModel {
 	this.editRow = editRow;
     }
 
-    public void unsetEditRow( ) {
+    void unsetEditRow( ) {
 	this.editRow = -1;
     }
 
-    public void cancelEditRow( int row ) {
+    void cancelEditRow( int row ) {
 	// Check if row being canceled equals the row currently being edited
 	if ( row != editRow ) return;
 
@@ -559,7 +562,7 @@ public class BoekTableModel extends AbstractTableModel {
 	return additionalUpdateString;
     }
 
-    public boolean saveEditRow( int row ) {
+    boolean saveEditRow( int row ) {
 	String updateString = null;
 	boolean updateId = false;
 
@@ -673,5 +676,5 @@ public class BoekTableModel extends AbstractTableModel {
 	}
     }
 
-    public boolean getRowModified( ) { return rowModified; }
+    boolean getRowModified( ) { return rowModified; }
 }

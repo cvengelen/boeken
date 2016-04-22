@@ -1,38 +1,35 @@
 // Class to setup a TableModel for records in editors
 
-package boeken.gui;
+package boeken.editors;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+
 import javax.swing.table.*;
-import java.text.*;
 import java.util.*;
 import java.util.logging.*;
 import java.util.regex.*;
 
 
-public class EditorsTableModel extends AbstractTableModel {
-    final Logger logger = Logger.getLogger( "boeken.gui.EditorsTableModel" );
+class EditorsTableModel extends AbstractTableModel {
+    private final Logger logger = Logger.getLogger( "boeken.editors.EditorsTableModel" );
 
     private Connection connection;
-    private String[ ] headings = { "Id", "Editors", "Persoon" };
+    private final String[ ] headings = { "Id", "Editors", "Persoon" };
 
-    class EditorsRecord {
+    private class EditorsRecord {
 	String  editorsString;
 	String  persoonString;
 	int	editorsId;
 	int	persoonId;
 
-	public EditorsRecord( String  editorsString,
-			      String  persoonString,
-			      int     editorsId,
-			      int    persoonId ) {
+	EditorsRecord( String  editorsString,
+                       String  persoonString,
+                       int     editorsId,
+                       int    persoonId ) {
 	    this.editorsString = editorsString;
 	    this.persoonString = persoonString;
 	    this.editorsId = editorsId;
@@ -40,21 +37,21 @@ public class EditorsTableModel extends AbstractTableModel {
 	}
     }
 
-    ArrayList editorsRecordList = new ArrayList( 20 );
+    private final ArrayList<EditorsRecord> editorsRecordList = new ArrayList<>( 20 );
 
     // Pattern to find a single quote in the titel, to be replaced
     // with escaped quote (the double slashes are really necessary)
-    final Pattern quotePattern = Pattern.compile( "\\'" );
+    private final Pattern quotePattern = Pattern.compile( "\\'" );
 
 
     // Constructor
-    public EditorsTableModel( Connection connection ) {
+    EditorsTableModel( Connection connection ) {
 	this.connection = connection;
 
 	setupEditorsTableModel( null );
     }
 
-    public void setupEditorsTableModel( String editorsFilterString ) {
+    void setupEditorsTableModel( String editorsFilterString ) {
 
 	// Setup the table
 	try {
@@ -126,10 +123,9 @@ public class EditorsTableModel extends AbstractTableModel {
 	    return null;
 	}
 
-	final EditorsRecord editorsRecord =
-	    ( EditorsRecord )editorsRecordList.get( row );
+	final EditorsRecord editorsRecord = editorsRecordList.get( row );
 
-	if ( column == 0 ) return new Integer( editorsRecord.editorsId );
+	if ( column == 0 ) return editorsRecord.editorsId;
 	if ( column == 1 ) return editorsRecord.editorsString;
 	if ( column == 2 ) return editorsRecord.persoonString;
 
@@ -146,8 +142,7 @@ public class EditorsTableModel extends AbstractTableModel {
 	    return;
 	}
 
-	final EditorsRecord editorsRecord =
-	    ( EditorsRecord )editorsRecordList.get( row );
+	final EditorsRecord editorsRecord = editorsRecordList.get( row );
 
 	String updateString = null;
 
@@ -207,19 +202,21 @@ public class EditorsTableModel extends AbstractTableModel {
 	fireTableCellUpdated( row, column );
     }
 
-    public int getEditorsId( int row ) {
-	final EditorsRecord editorsRecord =
-	    ( EditorsRecord )editorsRecordList.get( row );
+    int getEditorsId( int row ) {
+        if ( ( row < 0 ) || ( row >= editorsRecordList.size( ) ) ) {
+            logger.severe( "Invalid row: " + row );
+            return 0;
+        }
 
-	return editorsRecord.editorsId;
+	return (editorsRecordList.get( row )).editorsId;
     }
 
-    public String getEditorsString( int row ) {
+    String getEditorsString( int row ) {
 	if ( ( row < 0 ) || ( row >= editorsRecordList.size( ) ) ) {
 	    logger.severe( "Invalid row: " + row );
 	    return null;
 	}
 
-	return ( ( EditorsRecord )editorsRecordList.get( row ) ).editorsString;
+	return ( editorsRecordList.get( row ) ).editorsString;
     }
 }

@@ -1,38 +1,35 @@
 // Class to setup a TableModel for records in auteurs
 
-package boeken.gui;
+package boeken.auteurs;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+
 import javax.swing.table.*;
-import java.text.*;
 import java.util.*;
 import java.util.logging.*;
 import java.util.regex.*;
 
 
-public class AuteursTableModel extends AbstractTableModel {
-    final Logger logger = Logger.getLogger( "boeken.gui.AuteursTableModel" );
+class AuteursTableModel extends AbstractTableModel {
+    private final Logger logger = Logger.getLogger( AuteursTableModel.class.getCanonicalName() );
 
     private Connection connection;
-    private String[ ] headings = { "Id", "Auteurs", "Persoon" };
+    private final String[ ] headings = { "Id", "Auteurs", "Persoon" };
 
-    class AuteursRecord {
+    private class AuteursRecord {
 	String  auteursString;
 	String  persoonString;
 	int	auteursId;
 	int	persoonId;
 
-	public AuteursRecord( String auteursString,
-			      String persoonString,
-			      int    auteursId,
-			      int    persoonId ) {
+	AuteursRecord( String auteursString,
+                       String persoonString,
+                       int    auteursId,
+                       int    persoonId ) {
 	    this.auteursString = auteursString;
 	    this.persoonString = persoonString;
 	    this.auteursId = auteursId;
@@ -40,7 +37,7 @@ public class AuteursTableModel extends AbstractTableModel {
 	}
     }
 
-    ArrayList auteursRecordList = new ArrayList( 100 );
+    private final ArrayList<AuteursRecord> auteursRecordList = new ArrayList<>( 100 );
 
     // Pattern to find a single quote in the titel, to be replaced
     // with escaped quote (the double slashes are really necessary)
@@ -48,13 +45,13 @@ public class AuteursTableModel extends AbstractTableModel {
 
 
     // Constructor
-    public AuteursTableModel( Connection connection ) {
+    AuteursTableModel( Connection connection ) {
 	this.connection = connection;
 
 	setupAuteursTableModel( null );
     }
 
-    public void setupAuteursTableModel( String auteursFilterString ) {
+    void setupAuteursTableModel( String auteursFilterString ) {
 
 	// Setup the table
 	try {
@@ -130,10 +127,9 @@ public class AuteursTableModel extends AbstractTableModel {
 	    return null;
 	}
 
-	final AuteursRecord auteursRecord =
-	    ( AuteursRecord )auteursRecordList.get( row );
+	final AuteursRecord auteursRecord = auteursRecordList.get( row );
 
-	if ( column == 0 ) return new Integer( auteursRecord.auteursId );
+	if ( column == 0 ) return auteursRecord.auteursId;
 	if ( column == 1 ) return auteursRecord.auteursString;
 	if ( column == 2 ) return auteursRecord.persoonString;
 
@@ -146,8 +142,7 @@ public class AuteursTableModel extends AbstractTableModel {
 	    return;
 	}
 
-	final AuteursRecord auteursRecord =
-	    ( AuteursRecord )auteursRecordList.get( row );
+	final AuteursRecord auteursRecord = auteursRecordList.get( row );
 
 	String updateString = null;
 
@@ -207,19 +202,21 @@ public class AuteursTableModel extends AbstractTableModel {
 	fireTableCellUpdated( row, column );
     }
 
-    public int getAuteursId( int row ) {
-	final AuteursRecord auteursRecord =
-	    ( AuteursRecord )auteursRecordList.get( row );
+    int getAuteursId( int row ) {
+        if ( ( row < 0 ) || ( row >= auteursRecordList.size( ) ) ) {
+            logger.severe( "Invalid row: " + row );
+            return 0;
+        }
 
-	return auteursRecord.auteursId;
+        return (auteursRecordList.get( row )).auteursId;
     }
 
-    public String getAuteursString( int row ) {
+    String getAuteursString( int row ) {
 	if ( ( row < 0 ) || ( row >= auteursRecordList.size( ) ) ) {
 	    logger.severe( "Invalid row: " + row );
 	    return null;
 	}
 
-	return ( ( AuteursRecord )auteursRecordList.get( row ) ).auteursString;
+	return ( auteursRecordList.get( row ) ).auteursString;
     }
 }

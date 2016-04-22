@@ -1,48 +1,46 @@
 // frame to show and select records from editors
 
-package boeken.gui;
+package boeken.editors;
 
-import java.sql.Connection; 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*; 
+import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.table.*;
 import javax.swing.event.*;
 
-import java.util.*;
 import java.util.logging.*;
 
+import boeken.gui.EditEditorsDialog;
 import table.*;
 
 
-public class EditorsFrame {
-    final Logger logger = Logger.getLogger( "boeken.gui.EditorsFrame" );
+class EditorsFrame {
+    private final Logger logger = Logger.getLogger( "boeken.editors.EditorsFrame" );
 
-    final Connection connection;
-    final JFrame frame = new JFrame( "Editors" );
+    private final Connection connection;
+    private final JFrame frame = new JFrame( "Editors" );
 
-    JTextField editorsFilterTextField;
+    private JTextField editorsFilterTextField;
 
-    EditorsTableModel editorsTableModel;
-    TableSorter editorsTableSorter;
-    JTable editorsTable;
+    private EditorsTableModel editorsTableModel;
+    private TableSorter editorsTableSorter;
 
 
-    class Editors {
+    private class Editors {
 	int	id;
 	String  string;
 
-	public Editors( int    id,
-			String string ) {
+	Editors( int    id,
+                 String string ) {
 	    this.id = id;
 	    this.string = string;
 	}
 
-	public boolean presentInTable( String tableString ) {
+	boolean presentInTable( String tableString ) {
 	    // Check if editorsId is present in table
 	    try {
 		Statement statement = connection.createStatement( );
@@ -65,7 +63,7 @@ public class EditorsFrame {
     }
 
 
-    public EditorsFrame( final Connection connection ) {
+    EditorsFrame( final Connection connection ) {
 	this.connection = connection;
 
 	// put the controls the content pane
@@ -74,47 +72,51 @@ public class EditorsFrame {
 	// Set grid bag layout manager
 	container.setLayout( new GridBagLayout( ) );
 	GridBagConstraints constraints = new GridBagConstraints( );
-	constraints.anchor = GridBagConstraints.WEST;
-	constraints.insets = new Insets( 0, 0, 10, 10 );
 
+        constraints.insets = new Insets( 20, 20, 5, 5 );
 	constraints.gridx = 0;
 	constraints.gridy = 0;
 	constraints.gridwidth = 1;
+        constraints.anchor = GridBagConstraints.EAST;
 	container.add( new JLabel( "Editors Filter:" ), constraints );
-	editorsFilterTextField = new JTextField( 20 );
 
+	editorsFilterTextField = new JTextField( 20 );
+        constraints.insets = new Insets( 20, 5, 5, 40 );
 	constraints.gridx = GridBagConstraints.RELATIVE;
+        constraints.weightx = 1d;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.anchor = GridBagConstraints.WEST;
 	container.add( editorsFilterTextField, constraints );
 
-	class EditorsFilterActionListener implements ActionListener {
-	    public void actionPerformed( ActionEvent actionEvent ) {
-		// Setup the editors table
-		editorsTableModel.setupEditorsTableModel( editorsFilterTextField.getText( ) );
-	    }
-	}
-	editorsFilterTextField.addActionListener( new EditorsFilterActionListener( ) );
-
+	editorsFilterTextField.addActionListener( ( ActionEvent actionEvent ) -> {
+            editorsTableSorter.clearSortingState();
+            // Setup the editors table
+            editorsTableModel.setupEditorsTableModel( editorsFilterTextField.getText() );
+        } );
 
 	// Create editors table from title table model
 	editorsTableModel = new EditorsTableModel( connection );
 	editorsTableSorter = new TableSorter( editorsTableModel );
-	editorsTable = new JTable( editorsTableSorter );
+	final JTable editorsTable = new JTable( editorsTableSorter );
 	editorsTableSorter.setTableHeader( editorsTable.getTableHeader( ) );
 	// editorsTableSorter.setSortingStatus( 0, TableSorter.DESCENDING );
 
 	editorsTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
 
 	editorsTable.getColumnModel( ).getColumn( 0 ).setPreferredWidth(  50 );  // id
-	editorsTable.getColumnModel( ).getColumn( 1 ).setPreferredWidth( 200 );  // editors
-	editorsTable.getColumnModel( ).getColumn( 2 ).setPreferredWidth( 150 );  // persoon
+	editorsTable.getColumnModel( ).getColumn( 1 ).setPreferredWidth( 230 );  // editors
+	editorsTable.getColumnModel( ).getColumn( 2 ).setPreferredWidth( 160 );  // persoon
 
 	// Set vertical size just enough for 20 entries
-	editorsTable.setPreferredScrollableViewportSize( new Dimension( 400, 320 ) );
+	editorsTable.setPreferredScrollableViewportSize( new Dimension( 440, 300 ) );
 
+        constraints.insets = new Insets( 5, 20, 5, 20 );
 	constraints.gridx = 0;
-	constraints.gridy = 4;
-	constraints.gridwidth = 5;
-	constraints.insets = new Insets( 10, 0, 10, 10 );
+	constraints.gridy = 1;
+	constraints.gridwidth = 2;
+        constraints.weightx = 1d;
+        constraints.weighty = 1d;
+        constraints.fill = GridBagConstraints.BOTH;
 	constraints.anchor = GridBagConstraints.CENTER;
 	container.add( new JScrollPane( editorsTable ), constraints );
 
@@ -127,7 +129,7 @@ public class EditorsFrame {
 	final ListSelectionModel editorsListSelectionModel = editorsTable.getSelectionModel( );
 
 	class EditorsListSelectionListener implements ListSelectionListener {
-	    int selectedRow = -1;
+	    private int selectedRow = -1;
 
 	    public void valueChanged( ListSelectionEvent listSelectionEvent ) {
 		// Ignore extra messages.
@@ -162,9 +164,8 @@ public class EditorsFrame {
 		    System.exit( 0 );
 		} else if ( actionEvent.getActionCommand( ).equals( "insert" ) ) {
 		    // Insert new editors record
-		    EditEditorsDialog editEditorsDialog =
-			new EditEditorsDialog( connection, frame,
-					       editorsFilterTextField.getText( ) );
+		    new EditEditorsDialog( connection, frame,
+                                           editorsFilterTextField.getText( ) );
 		} else {
 		    int selectedRow = editorsListSelectionListener.getSelectedRow( );
 		    if ( selectedRow < 0 ) {
@@ -175,7 +176,7 @@ public class EditorsFrame {
 			return;
 		    }
 
-		    // Get the selected editors id 
+		    // Get the selected editors id
 		    int selectedEditorsId = editorsTableModel.getEditorsId( selectedRow );
 
 		    // Check if editors has been selected
@@ -189,8 +190,7 @@ public class EditorsFrame {
 
 		    if ( actionEvent.getActionCommand( ).equals( "edit" ) ) {
 			// Do dialog
-			EditEditorsDialog editEditorsDialog =
-			    new EditEditorsDialog( connection, frame, selectedEditorsId );
+                        new EditEditorsDialog( connection, frame, selectedEditorsId );
 		    } else if ( actionEvent.getActionCommand( ).equals( "delete" ) ) {
 			final Editors editors = new Editors( editorsTableModel.getEditorsId( selectedRow ),
 							     editorsTableModel.getEditorsString( selectedRow ) );
@@ -271,14 +271,15 @@ public class EditorsFrame {
 	closeButton.addActionListener( buttonActionListener );
 	buttonPanel.add( closeButton );
 
-	constraints.gridx = 1;
-	constraints.gridy = 5;
-	constraints.gridwidth = 3;
-	constraints.insets = new Insets( 10, 0, 0, 10 );
-	constraints.anchor = GridBagConstraints.CENTER;
+        constraints.insets = new Insets( 5, 20, 20, 20 );
+	constraints.gridx = 0;
+	constraints.gridy = 2;
+        constraints.weightx = 0d;
+        constraints.weighty = 0d;
+        constraints.fill = GridBagConstraints.NONE;
 	container.add( buttonPanel, constraints );
 
-	frame.setSize( 600, 500 );
+	frame.setSize( 500, 460 );
 	frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 	frame.setVisible(true);
     }

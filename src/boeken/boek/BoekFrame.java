@@ -1,49 +1,44 @@
 // frame to show and select records from boek
 
-package boeken.gui;
+package boeken.boek;
 
-import java.sql.Connection; 
-import java.sql.SQLException; 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*; 
+import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.table.*;
 import javax.swing.event.*;
 
-import java.text.*;
-import java.util.*;
 import java.util.logging.*;
 
+import boeken.gui.*;
 import table.*;
 
 
-public class BoekFrame {
-    final Logger logger = Logger.getLogger( "boeken.gui.BoekFrame" );
+class BoekFrame {
+    private final Logger logger = Logger.getLogger( BoekFrame.class.getCanonicalName() );
 
-    final Connection connection;
-    final JFrame frame = new JFrame( "Boek");
+    private final JFrame frame = new JFrame( "Boek");
 
-    JTextField boekFilterTextField;
+    private JTextField boekFilterTextField;
 
-    int selectedTypeId = 0;
-    TypeComboBox typeComboBox;
+    private int selectedTypeId = 0;
+    private TypeComboBox typeComboBox;
 
-    int selectedUitgeverId = 0;
-    UitgeverComboBox uitgeverComboBox;
+    private int selectedUitgeverId = 0;
+    private UitgeverComboBox uitgeverComboBox;
 
-    int selectedStatusId = 0;
-    StatusComboBox statusComboBox;
+    private int selectedStatusId = 0;
+    private StatusComboBox statusComboBox;
 
-    BoekTableModel boekTableModel;
-    TableSorter boekTableSorter;
-    JTable boekTable;
+    private BoekTableModel boekTableModel;
+    private TableSorter boekTableSorter;
 
 
-    public BoekFrame( final Connection connection ) {
-	this.connection = connection;
+    BoekFrame( final Connection connection ) {
 
 	// put the controls the content pane
 	Container container = frame.getContentPane();
@@ -51,106 +46,102 @@ public class BoekFrame {
 	// Set grid bag layout manager
 	container.setLayout( new GridBagLayout( ) );
 	GridBagConstraints constraints = new GridBagConstraints( );
-	constraints.anchor = GridBagConstraints.EAST;
-	constraints.insets = new Insets( 5, 10, 5, 10 );
-	// constraints.weightx = 1.0;
-	// constraints.weighty = 0.0;
+	constraints.weightx = 0d;
+	constraints.weighty = 0d;
 
 
 	/////////////////////////////////
 	// Boek Filter
 	/////////////////////////////////
 
+        constraints.insets = new Insets( 20, 20, 5, 5 );
 	constraints.gridx = 0;
 	constraints.gridy = 0;
 	constraints.gridwidth = 1;
-	constraints.anchor = GridBagConstraints.EAST;
+        constraints.anchor = GridBagConstraints.EAST;
 	container.add( new JLabel( "Boek Filter:" ), constraints );
-	boekFilterTextField = new JTextField( 55 );
+	boekFilterTextField = new JTextField( 20 );
 
+        constraints.insets = new Insets( 20, 5, 5, 20 );
 	constraints.gridx = GridBagConstraints.RELATIVE;
-	constraints.anchor = GridBagConstraints.WEST;
+        constraints.anchor = GridBagConstraints.WEST;
 	container.add( boekFilterTextField, constraints );
 
-	class BoekFilterActionListener implements ActionListener {
-	    public void actionPerformed( ActionEvent actionEvent ) {
-		// Setup the boek table
-		boekTableSorter.clearSortingState( );
-		boekTableModel.setupBoekTableModel( boekFilterTextField.getText( ),
-						    selectedTypeId,
-						    selectedUitgeverId,
-						    selectedStatusId );
-	    }
-	}
-	boekFilterTextField.addActionListener( new BoekFilterActionListener( ) );
+	boekFilterTextField.addActionListener( ( ActionEvent actionEvent ) -> {
+            // Setup the boek table
+            boekTableSorter.clearSortingState( );
+            boekTableModel.setupBoekTableModel( boekFilterTextField.getText( ),
+                    selectedTypeId,
+                    selectedUitgeverId,
+                    selectedStatusId );
+        } );
 
 
 	/////////////////////////////////
 	// Type Combo Box
 	/////////////////////////////////
 
+        constraints.insets = new Insets( 5, 20, 5, 5 );
 	constraints.gridx = 0;
 	constraints.gridy = 1;
-	constraints.anchor = GridBagConstraints.EAST;
-	container.add( new JLabel( "Type:" ), constraints );
+        constraints.anchor = GridBagConstraints.EAST;
+        container.add( new JLabel( "Type:" ), constraints );
 
 	// Setup a JComboBox for type
 	typeComboBox = new TypeComboBox( connection );
+        constraints.insets = new Insets( 5, 5, 5, 20 );
 	constraints.gridx = GridBagConstraints.RELATIVE;
-	constraints.anchor = GridBagConstraints.WEST;
+        constraints.anchor = GridBagConstraints.WEST;
 	container.add( typeComboBox, constraints );
 
-	class SelectTypeActionListener implements ActionListener {
-	    public void actionPerformed( ActionEvent actionEvent ) {
-		// Get the selected type ID from the combo box
-		selectedTypeId = typeComboBox.getSelectedTypeId( );
+	typeComboBox.addActionListener( ( ActionEvent actionEvent ) -> {
+            // Get the selected type ID from the combo box
+            selectedTypeId = typeComboBox.getSelectedTypeId( );
 
-		// Setup the boek table for the selected type
-		boekTableSorter.clearSortingState( );
-		boekTableModel.setupBoekTableModel( boekFilterTextField.getText( ),
-						    selectedTypeId,
-						    selectedUitgeverId,
-						    selectedStatusId  );
-	    }
-	}
-	typeComboBox.addActionListener( new SelectTypeActionListener( ) );
+            // Setup the boek table for the selected type
+            boekTableSorter.clearSortingState( );
+            boekTableModel.setupBoekTableModel( boekFilterTextField.getText( ),
+                                                selectedTypeId,
+                                                selectedUitgeverId,
+                                                selectedStatusId  );
+        } );
 
 
-	/////////////////////////////////
+        /////////////////////////////////
 	// Uitgever Combo Box
 	/////////////////////////////////
 
+        constraints.insets = new Insets( 5, 20, 5, 5 );
 	constraints.gridx = 0;
 	constraints.gridy = 2;
-	constraints.anchor = GridBagConstraints.EAST;
+        constraints.anchor = GridBagConstraints.EAST;
 	container.add( new JLabel( "Uitgever:" ), constraints );
 
 	// Setup a JComboBox with the results of the query on uitgever
 	uitgeverComboBox = new UitgeverComboBox( connection, frame, false );
+        constraints.insets = new Insets( 5, 5, 5, 20 );
 	constraints.gridx = GridBagConstraints.RELATIVE;
-	constraints.anchor = GridBagConstraints.WEST;
+        constraints.anchor = GridBagConstraints.WEST;
 	container.add( uitgeverComboBox, constraints );
 
-	class SelectUitgeverActionListener implements ActionListener {
-	    public void actionPerformed( ActionEvent actionEvent ) {
-		// Get the selected uitgever ID from the combo box
-		selectedUitgeverId = uitgeverComboBox.getSelectedUitgeverId( );
+	uitgeverComboBox.addActionListener( ( ActionEvent actionEvent ) -> {
+            // Get the selected uitgever ID from the combo box
+            selectedUitgeverId = uitgeverComboBox.getSelectedUitgeverId( );
 
-		// Setup the boek table for the selected uitgever
-		boekTableSorter.clearSortingState( );
-		boekTableModel.setupBoekTableModel( boekFilterTextField.getText( ),
-						    selectedTypeId,
-						    selectedUitgeverId,
-						    selectedStatusId );
-	    }
-	}
-	uitgeverComboBox.addActionListener( new SelectUitgeverActionListener( ) );
+            // Setup the boek table for the selected uitgever
+            boekTableSorter.clearSortingState( );
+            boekTableModel.setupBoekTableModel( boekFilterTextField.getText( ),
+                    selectedTypeId,
+                    selectedUitgeverId,
+                    selectedStatusId );
+        } );
 
 
 	/////////////////////////////////
 	// Status Combo Box
 	/////////////////////////////////
 
+        constraints.insets = new Insets( 5, 20, 5, 5 );
 	constraints.gridx = 0;
 	constraints.gridy = 3;
 	constraints.anchor = GridBagConstraints.EAST;
@@ -158,24 +149,22 @@ public class BoekFrame {
 
 	// Setup a JComboBox for status
 	statusComboBox = new StatusComboBox( connection );
+        constraints.insets = new Insets( 5, 5, 5, 20 );
 	constraints.gridx = GridBagConstraints.RELATIVE;
 	constraints.anchor = GridBagConstraints.WEST;
 	container.add( statusComboBox, constraints );
 
-	class SelectStatusActionListener implements ActionListener {
-	    public void actionPerformed( ActionEvent actionEvent ) {
-		// Get the selected status ID from the combo box
-		selectedStatusId = statusComboBox.getSelectedStatusId( );
+	statusComboBox.addActionListener( ( ActionEvent actionEvent ) -> {
+            // Get the selected status ID from the combo box
+            selectedStatusId = statusComboBox.getSelectedStatusId( );
 
-		// Setup the boek table for the selected status
-		boekTableSorter.clearSortingState( );
-		boekTableModel.setupBoekTableModel( boekFilterTextField.getText( ),
-						    selectedTypeId,
-						    selectedUitgeverId,
-						    selectedStatusId );
-	    }
-	}
-	statusComboBox.addActionListener( new SelectStatusActionListener( ) );
+            // Setup the boek table for the selected status
+            boekTableSorter.clearSortingState( );
+            boekTableModel.setupBoekTableModel( boekFilterTextField.getText( ),
+                    selectedTypeId,
+                    selectedUitgeverId,
+                    selectedStatusId );
+        } );
 
 
 	// Define the edit, cancel, save and delete buttons
@@ -191,7 +180,7 @@ public class BoekFrame {
 					     cancelBoekButton,
 					     saveBoekButton );
 	boekTableSorter = new TableSorter( boekTableModel );
-	boekTable = new JTable( boekTableSorter );
+	final JTable boekTable = new JTable( boekTableSorter );
 	boekTableSorter.setTableHeader( boekTable.getTableHeader( ) );
 	// boekTableSorter.setSortingStatus( 0, TableSorter.DESCENDING );
 
@@ -227,13 +216,14 @@ public class BoekFrame {
 	// Set vertical size just enough for 20 entries
 	boekTable.setPreferredScrollableViewportSize( new Dimension( 1020, 320 ) );
 
+        constraints.insets = new Insets( 5, 20, 5, 20 );
 	constraints.gridx = 0;
 	constraints.gridy = 4;
 	constraints.gridwidth = 2;
 	constraints.anchor = GridBagConstraints.CENTER;
 	// Setting weighty and fill is necessary for proper filling the frame when resized.
-    constraints.weightx = 1.0;
-	constraints.weighty = 1.0;
+        constraints.weightx = 1d;
+	constraints.weighty = 1d;
 	constraints.fill = GridBagConstraints.BOTH;
 	container.add( new JScrollPane( boekTable ), constraints );
 
@@ -242,7 +232,7 @@ public class BoekFrame {
 	final ListSelectionModel boekListSelectionModel = boekTable.getSelectionModel( );
 
 	class BoekListSelectionListener implements ListSelectionListener {
-	    int selectedRow = -1;
+	    private int selectedRow = -1;
 
 	    public void valueChanged( ListSelectionEvent listSelectionEvent ) {
 		// Ignore extra messages.
@@ -310,7 +300,7 @@ public class BoekFrame {
 		deleteBoekButton.setEnabled( true );
 	    }
 
-	    public int getSelectedRow ( ) { return selectedRow; }
+	    int getSelectedRow ( ) { return selectedRow; }
 	}
 
 	// Add boekListSelectionListener object to the selection model of the musici table
@@ -327,12 +317,11 @@ public class BoekFrame {
 		    return;
 		} else if ( actionEvent.getActionCommand( ).equals( "insert" ) ) {
 		    // Insert new boek record
-		    EditBoekDialog editBoekDialog =
-			new EditBoekDialog( connection, frame,
-					    boekFilterTextField.getText( ),
-					    selectedTypeId,
-					    selectedUitgeverId,
-					    selectedStatusId );
+		    new EditBoekDialog( connection, frame,
+                                        boekFilterTextField.getText( ),
+                                        selectedTypeId,
+                                        selectedUitgeverId,
+                                        selectedStatusId );
 
 		    // Records may have been modified: setup the table model again
 		    boekTableSorter.clearSortingState( );
@@ -350,7 +339,7 @@ public class BoekFrame {
 			return;
 		    }
 
-		    // Get the selected boek id 
+		    // Get the selected boek id
 		    final int selectedBoekId = boekTableModel.getBoekId( selectedRow );
 
 		    // Check if boek has been selected
@@ -364,8 +353,7 @@ public class BoekFrame {
 
 		    if ( actionEvent.getActionCommand( ).equals( "openDialog" ) ) {
 			// Do dialog
-			EditBoekDialog editBoekDialog =
-			    new EditBoekDialog( connection, frame, selectedBoekId );
+			new EditBoekDialog( connection, frame, selectedBoekId );
 
 			// Records may have been modified: setup the table model again
 			boekTableSorter.clearSortingState( );
@@ -520,9 +508,12 @@ public class BoekFrame {
 	closeButton.addActionListener( buttonActionListener );
 	buttonPanel.add( closeButton );
 
+        constraints.insets = new Insets( 5, 20, 20, 20 );
 	constraints.gridx = 0;
 	constraints.gridy = 5;
-	constraints.weighty = 0.0;
+        constraints.weightx = 0d;
+        constraints.weighty = 0d;
+        constraints.fill = GridBagConstraints.NONE;
 	container.add( buttonPanel, constraints );
 
 	frame.setSize( 1080, 600 );
