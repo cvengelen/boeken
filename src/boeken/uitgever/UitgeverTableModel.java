@@ -1,38 +1,34 @@
 // Class to setup a TableModel for records in uitgever
 
-package boeken.gui;
+package boeken.uitgever;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
 import javax.swing.table.*;
-import java.text.*;
 import java.util.*;
 import java.util.logging.*;
 import java.util.regex.*;
 
 
-public class UitgeverTableModel extends AbstractTableModel {
-    final Logger logger = Logger.getLogger( "boeken.gui.UitgeverTableModel" );
+class UitgeverTableModel extends AbstractTableModel {
+    private final Logger logger = Logger.getLogger( UitgeverTableModel.class.getCanonicalName() );
 
     private Connection connection;
-    private String[ ] headings = { "Id", "Uitgever", "ISBN 1", "ISBN 2" };
+    private final String[ ] headings = { "Id", "Uitgever", "ISBN 1", "ISBN 2" };
 
-    class UitgeverRecord {
+    private class UitgeverRecord {
 	String  uitgeverString;
 	String  isbn1String;
 	String  isbn2String;
 	int	uitgeverId;
 
-	public UitgeverRecord( String  uitgeverString,
-			       String  isbn1String,
-			       String  isbn2String,
-			       int     uitgeverId ) {
+	UitgeverRecord( String  uitgeverString,
+                        String  isbn1String,
+                        String  isbn2String,
+                        int     uitgeverId ) {
 	    this.uitgeverString = uitgeverString;
 	    this.isbn1String = isbn1String;
 	    this.isbn2String = isbn2String;
@@ -40,21 +36,21 @@ public class UitgeverTableModel extends AbstractTableModel {
 	}
     }
 
-    ArrayList uitgeverRecordList = new ArrayList( 200 );
+    private final ArrayList<UitgeverRecord> uitgeverRecordList = new ArrayList<>( 200 );
 
     // Pattern to find a single quote in the titel, to be replaced
     // with escaped quote (the double slashes are really necessary)
-    final Pattern quotePattern = Pattern.compile( "\\'" );
+    private final Pattern quotePattern = Pattern.compile( "\\'" );
 
 
     // Constructor
-    public UitgeverTableModel( Connection connection ) {
+    UitgeverTableModel( Connection connection ) {
 	this.connection = connection;
 
 	setupUitgeverTableModel( null );
     }
 
-    public void setupUitgeverTableModel( String uitgeverFilterString ) {
+    void setupUitgeverTableModel( String uitgeverFilterString ) {
 	// Setup the table
 	try {
 	    String uitgeverQueryString =
@@ -123,10 +119,9 @@ public class UitgeverTableModel extends AbstractTableModel {
 	    return null;
 	}
 
-	final UitgeverRecord uitgeverRecord =
-	    ( UitgeverRecord )uitgeverRecordList.get( row );
+	final UitgeverRecord uitgeverRecord = uitgeverRecordList.get( row );
 
-	if ( column == 0 ) return new Integer( uitgeverRecord.uitgeverId );
+	if ( column == 0 ) return uitgeverRecord.uitgeverId;
 	if ( column == 1 ) return uitgeverRecord.uitgeverString;
 	if ( column == 2 ) return uitgeverRecord.isbn1String;
 	if ( column == 3 ) return uitgeverRecord.isbn2String;
@@ -140,8 +135,7 @@ public class UitgeverTableModel extends AbstractTableModel {
 	    return;
 	}
 
-	final UitgeverRecord uitgeverRecord =
-	    ( UitgeverRecord )uitgeverRecordList.get( row );
+	final UitgeverRecord uitgeverRecord = uitgeverRecordList.get( row );
 
 	String updateString = null;
 
@@ -238,21 +232,23 @@ public class UitgeverTableModel extends AbstractTableModel {
 	return headings[ column ];
     }
 
-    public int getNumberOfRecords( ) { return uitgeverRecordList.size( ); }
+    int getNumberOfRecords( ) { return uitgeverRecordList.size( ); }
 
-    public int getUitgeverId( int row ) {
-	final UitgeverRecord uitgeverRecord =
-	    ( UitgeverRecord )uitgeverRecordList.get( row );
+    int getUitgeverId( int row ) {
+        if ( ( row < 0 ) || ( row >= uitgeverRecordList.size( ) ) ) {
+            logger.severe( "Invalid row: " + row );
+            return 0;
+        }
 
-	return uitgeverRecord.uitgeverId;
+	return uitgeverRecordList.get( row ).uitgeverId;
     }
 
-    public String getUitgeverString( int row ) {
+    String getUitgeverString( int row ) {
 	if ( ( row < 0 ) || ( row >= uitgeverRecordList.size( ) ) ) {
 	    logger.severe( "Invalid row: " + row );
 	    return null;
 	}
 
-	return ( ( UitgeverRecord )uitgeverRecordList.get( row ) ).uitgeverString;
+	return uitgeverRecordList.get( row ).uitgeverString;
     }
 }

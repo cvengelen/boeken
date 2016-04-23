@@ -57,7 +57,7 @@ public class LabelFrame {
             labelTableModel.setupLabelTableModel( labelFilterTextField.getText() );
         } );
 
-	// Create label table from title table model
+	// Create label table from label table model
 	labelTableModel = new LabelTableModel( connection );
 	labelTableSorter = new TableSorter( labelTableModel );
 	final JTable labelTable = new JTable( labelTableSorter );

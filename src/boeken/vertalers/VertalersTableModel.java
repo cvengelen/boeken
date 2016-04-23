@@ -1,38 +1,34 @@
 // Class to setup a TableModel for records in vertalers
 
-package boeken.gui;
+package boeken.vertalers;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
 import javax.swing.table.*;
-import java.text.*;
 import java.util.*;
 import java.util.logging.*;
 import java.util.regex.*;
 
 
-public class VertalersTableModel extends AbstractTableModel {
-    final Logger logger = Logger.getLogger( "boeken.gui.VertalersTableModel" );
+class VertalersTableModel extends AbstractTableModel {
+    private final Logger logger = Logger.getLogger( VertalersTableModel.class.getCanonicalName() );
 
     private Connection connection;
-    private String[ ] headings = { "Id", "Vertalers", "Persoon" };
+    private final String[ ] headings = { "Id", "Vertalers", "Persoon" };
 
-    class VertalersRecord {
+    private class VertalersRecord {
 	String  vertalersString;
 	String  persoonString;
 	int	vertalersId;
 	int	persoonId;
 
-	public VertalersRecord( String vertalersString,
-				String persoonString,
-				int    vertalersId,
-				int    persoonId ) {
+	VertalersRecord( String vertalersString,
+                         String persoonString,
+                         int    vertalersId,
+                         int    persoonId ) {
 	    this.vertalersString = vertalersString;
 	    this.persoonString = persoonString;
 	    this.vertalersId = vertalersId;
@@ -40,21 +36,21 @@ public class VertalersTableModel extends AbstractTableModel {
 	}
     }
 
-    ArrayList vertalersRecordList = new ArrayList( 100 );
+    private final ArrayList<VertalersRecord> vertalersRecordList = new ArrayList<>( 100 );
 
     // Pattern to find a single quote in the titel, to be replaced
     // with escaped quote (the double slashes are really necessary)
-    final Pattern quotePattern = Pattern.compile( "\\'" );
+    private final Pattern quotePattern = Pattern.compile( "\\'" );
 
 
     // Constructor
-    public VertalersTableModel( Connection connection ) {
+    VertalersTableModel( Connection connection ) {
 	this.connection = connection;
 
 	setupVertalersTableModel( null );
     }
 
-    public void setupVertalersTableModel( String vertalersFilterString ) {
+    void setupVertalersTableModel( String vertalersFilterString ) {
 
 	// Setup the table
 	try {
@@ -130,16 +126,14 @@ public class VertalersTableModel extends AbstractTableModel {
 	    return null;
 	}
 
-	final VertalersRecord vertalersRecord =
-	    ( VertalersRecord )vertalersRecordList.get( row );
+	final VertalersRecord vertalersRecord = vertalersRecordList.get( row );
 
-	if ( column == 0 ) return new Integer( vertalersRecord.vertalersId );
+	if ( column == 0 ) return vertalersRecord.vertalersId;
 	if ( column == 1 ) return vertalersRecord.vertalersString;
 	if ( column == 2 ) return vertalersRecord.persoonString;
 
 	return "";
     }
-
 
     public void setValueAt( Object object, int row, int column ) {
 	if ( ( row < 0 ) || ( row >= vertalersRecordList.size( ) ) ) {
@@ -147,8 +141,7 @@ public class VertalersTableModel extends AbstractTableModel {
 	    return;
 	}
 
-	final VertalersRecord vertalersRecord =
-	    ( VertalersRecord )vertalersRecordList.get( row );
+	final VertalersRecord vertalersRecord = vertalersRecordList.get( row );
 
 	String updateString = null;
 
@@ -208,19 +201,21 @@ public class VertalersTableModel extends AbstractTableModel {
 	fireTableCellUpdated( row, column );
     }
 
-    public int getVertalersId( int row ) {
-	final VertalersRecord vertalersRecord =
-	    ( VertalersRecord )vertalersRecordList.get( row );
+    int getVertalersId( int row ) {
+        if ( ( row < 0 ) || ( row >= vertalersRecordList.size( ) ) ) {
+            logger.severe( "Invalid row: " + row );
+            return 0;
+        }
 
-	return vertalersRecord.vertalersId;
+	return vertalersRecordList.get( row ).vertalersId;
     }
 
-    public String getVertalersString( int row ) {
+    String getVertalersString( int row ) {
 	if ( ( row < 0 ) || ( row >= vertalersRecordList.size( ) ) ) {
 	    logger.severe( "Invalid row: " + row );
 	    return null;
 	}
 
-	return ( ( VertalersRecord )vertalersRecordList.get( row ) ).vertalersString;
+	return vertalersRecordList.get( row ).vertalersString;
     }
 }

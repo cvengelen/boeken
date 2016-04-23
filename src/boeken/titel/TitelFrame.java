@@ -1,6 +1,6 @@
 // frame to show records in titel table
 
-package boeken.gui;
+package boeken.titel;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -15,42 +15,40 @@ import javax.swing.event.*;
 import java.util.logging.*;
 import java.util.regex.*;
 
+import boeken.gui.*;
 import table.*;
 
 
-public class TitelFrame {
-    final Logger logger = Logger.getLogger( "boeken.gui.TitelFrame" );
+class TitelFrame {
+    private final Logger logger = Logger.getLogger( TitelFrame.class.getCanonicalName() );
 
-    final Connection connection;
-    final JFrame frame = new JFrame( "Titel" );
+    private final JFrame frame = new JFrame( "Titel" );
 
-    JTextField boekFilterTextField;
-    JTextField titelFilterTextField;
-    JTextField opmerkingenFilterTextField;
+    private JTextField boekFilterTextField;
+    private JTextField titelFilterTextField;
+    private JTextField opmerkingenFilterTextField;
 
-    AuteursComboBox auteursComboBox;
-    int selectedAuteursId = 0;
+    private AuteursComboBox auteursComboBox;
+    private int selectedAuteursId = 0;
 
-    OnderwerpComboBox onderwerpComboBox;
-    int selectedOnderwerpId = 0;
+    private OnderwerpComboBox onderwerpComboBox;
+    private int selectedOnderwerpId = 0;
 
-    VormComboBox vormComboBox;
-    int selectedVormId = 0;
+    private VormComboBox vormComboBox;
+    private int selectedVormId = 0;
 
-    TaalComboBox taalComboBox;
-    int selectedTaalId = 0;
+    private TaalComboBox taalComboBox;
+    private int selectedTaalId = 0;
 
-    TitelTableModel titelTableModel;
-    TableSorter titelTableSorter;
-    JTable titelTable;
+    private TitelTableModel titelTableModel;
+    private TableSorter titelTableSorter;
 
     // Pattern to find a single quote in the titel, to be replaced
     // with escaped quote (the double slashes are really necessary)
-    final Pattern quotePattern = Pattern.compile( "\\'" );
+    private final Pattern quotePattern = Pattern.compile( "\\'" );
 
 
-    public TitelFrame( final Connection connection ) {
-        this.connection = connection;
+    TitelFrame( final Connection connection ) {
 
         // put the controls the content pane
         Container container = frame.getContentPane( );
@@ -58,85 +56,96 @@ public class TitelFrame {
         // Set grid bag layout manager
         container.setLayout( new GridBagLayout( ) );
         GridBagConstraints constraints = new GridBagConstraints( );
-        constraints.insets = new Insets( 5, 10, 5, 10 );
-
 
         /////////////////////////////////
         // Text filter action listener
         /////////////////////////////////
-
-        class TextFilterActionListener implements ActionListener {
-            public void actionPerformed( ActionEvent actionEvent ) {
-                // Setup the titel table
-                titelTableSorter.clearSortingState( );
-                titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
-                        titelFilterTextField.getText( ),
-                        opmerkingenFilterTextField.getText( ),
-                        selectedAuteursId,
-                        selectedOnderwerpId,
-                        selectedVormId,
-                        selectedTaalId );
-            }
-        }
-        final TextFilterActionListener textFilterActionListener = new TextFilterActionListener( );
-
+        final ActionListener textFilterActionListener = ( ActionEvent actionEvent ) -> {
+            // Setup the titel table
+            titelTableSorter.clearSortingState( );
+            titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
+                                                  titelFilterTextField.getText( ),
+                                                  opmerkingenFilterTextField.getText( ),
+                                                  selectedAuteursId,
+                                                  selectedOnderwerpId,
+                                                  selectedVormId,
+                                                  selectedTaalId );
+        };
 
         /////////////////////////////////
         // Boek filter string
         /////////////////////////////////
 
+        constraints.insets = new Insets( 20, 20, 5, 5 );
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.gridwidth = 1;
         constraints.anchor = GridBagConstraints.EAST;
+        constraints.weightx = 0;
+        constraints.fill = GridBagConstraints.NONE;
         container.add( new JLabel( "Boek Filter:" ), constraints );
 
-        boekFilterTextField = new JTextField( 50 );
+        boekFilterTextField = new JTextField( 30 );
         boekFilterTextField.addActionListener( textFilterActionListener );
+        constraints.insets = new Insets( 20, 5, 5, 600 );
         constraints.gridx = GridBagConstraints.RELATIVE;
         constraints.anchor = GridBagConstraints.WEST;
+        constraints.weightx = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
         container.add( boekFilterTextField, constraints );
-
 
         /////////////////////////////////
         // Titel filter string
         /////////////////////////////////
 
+        constraints.insets = new Insets( 5, 20, 5, 5 );
         constraints.gridx = 0;
         constraints.gridy = 1;
         constraints.anchor = GridBagConstraints.EAST;
+        constraints.weightx = 0;
+        constraints.fill = GridBagConstraints.NONE;
         container.add( new JLabel( "Titel Filter:" ), constraints );
 
-        titelFilterTextField = new JTextField( 50 );
+        titelFilterTextField = new JTextField( 30 );
         titelFilterTextField.addActionListener( textFilterActionListener );
+        constraints.insets = new Insets( 5, 5, 5, 600 );
         constraints.gridx = GridBagConstraints.RELATIVE;
         constraints.anchor = GridBagConstraints.WEST;
+        constraints.weightx = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
         container.add( titelFilterTextField, constraints );
-
 
         /////////////////////////////////
         // Opmerkingen filter string
         /////////////////////////////////
 
+        constraints.insets = new Insets( 5, 20, 5, 5 );
         constraints.gridx = 0;
         constraints.gridy = 2;
         constraints.anchor = GridBagConstraints.EAST;
+        constraints.weightx = 0;
+        constraints.fill = GridBagConstraints.NONE;
         container.add( new JLabel( "Opmerkingen Filter:" ), constraints );
 
-        opmerkingenFilterTextField = new JTextField( 50 );
+        opmerkingenFilterTextField = new JTextField( 30 );
         opmerkingenFilterTextField.addActionListener( textFilterActionListener );
+        constraints.insets = new Insets( 5, 5, 5, 600 );
         constraints.gridx = GridBagConstraints.RELATIVE;
         constraints.anchor = GridBagConstraints.WEST;
+        constraints.weightx = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
         container.add( opmerkingenFilterTextField, constraints );
-
 
         /////////////////////////////////
         // Auteurs Combo Box
         /////////////////////////////////
 
+        constraints.insets = new Insets( 5, 20, 5, 5 );
         constraints.gridx = 0;
         constraints.gridy = 3;
         constraints.anchor = GridBagConstraints.EAST;
+        constraints.weightx = 0;
+        constraints.fill = GridBagConstraints.NONE;
         container.add( new JLabel( "Auteurs:" ), constraints );
 
         final JPanel auteursPanel = new JPanel( );
@@ -147,35 +156,28 @@ public class TitelFrame {
         auteursComboBox = new AuteursComboBox( connection, frame, false );
         auteursPanel.add( auteursComboBox );
 
-        class SelectAuteursActionListener implements ActionListener {
-            public void actionPerformed( ActionEvent actionEvent ) {
-                // Get the selected auteurs ID from the combo box
-                selectedAuteursId = auteursComboBox.getSelectedAuteursId( );
+        auteursComboBox.addActionListener( ( ActionEvent actionEvent ) -> {
+            // Get the selected auteurs ID from the combo box
+            selectedAuteursId = auteursComboBox.getSelectedAuteursId( );
 
-                // Setup the titel table for the selected auteurs
-                titelTableSorter.clearSortingState( );
-                titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
-                        titelFilterTextField.getText( ),
-                        opmerkingenFilterTextField.getText( ),
-                        selectedAuteursId,
-                        selectedOnderwerpId,
-                        selectedVormId,
-                        selectedTaalId );
-            }
-        }
-        auteursComboBox.addActionListener( new SelectAuteursActionListener( ) );
+            // Setup the titel table for the selected auteurs
+            titelTableSorter.clearSortingState( );
+            titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
+                                                  titelFilterTextField.getText( ),
+                                                  opmerkingenFilterTextField.getText( ),
+                                                  selectedAuteursId,
+                                                  selectedOnderwerpId,
+                                                  selectedVormId,
+                                                  selectedTaalId );
+        } );
 
         JButton filterAuteursButton = new JButton( "Filter" );
         filterAuteursButton.setActionCommand( "filterAuteurs" );
         auteursPanel.add( filterAuteursButton );
 
-        class FilterAuteursActionListener implements ActionListener {
-            public void actionPerformed( ActionEvent actionEvent ) {
-                auteursComboBox.filterAuteursComboBox( );
-            }
-        }
-        filterAuteursButton.addActionListener( new FilterAuteursActionListener( ) );
+        filterAuteursButton.addActionListener( ( ActionEvent actionEvent ) -> auteursComboBox.filterAuteursComboBox( ) );
 
+        constraints.insets = new Insets( 5, 5, 5, 20 );
         constraints.gridx = GridBagConstraints.RELATIVE;
         constraints.anchor = GridBagConstraints.WEST;
         container.add( auteursPanel, constraints );
@@ -185,103 +187,106 @@ public class TitelFrame {
         // Onderwerp Combo Box
         /////////////////////////////////
 
+        constraints.insets = new Insets( 5, 20, 5, 5 );
         constraints.gridx = 0;
         constraints.gridy = 4;
         constraints.anchor = GridBagConstraints.EAST;
+        constraints.weightx = 0;
+        constraints.fill = GridBagConstraints.NONE;
         container.add( new JLabel( "Onderwerp:" ), constraints );
 
         // Setup a JComboBox for onderwerp
         onderwerpComboBox = new OnderwerpComboBox( connection );
+        constraints.insets = new Insets( 5, 5, 5, 20 );
         constraints.gridx = GridBagConstraints.RELATIVE;
         constraints.anchor = GridBagConstraints.WEST;
         container.add( onderwerpComboBox, constraints );
 
-        class SelectOnderwerpActionListener implements ActionListener {
-            public void actionPerformed( ActionEvent actionEvent ) {
-                // Get the selected onderwerp ID from the combo box
-                selectedOnderwerpId = onderwerpComboBox.getSelectedOnderwerpId( );
+        onderwerpComboBox.addActionListener( ( ActionEvent actionEvent ) -> {
+            // Get the selected onderwerp ID from the combo box
+            selectedOnderwerpId = onderwerpComboBox.getSelectedOnderwerpId( );
 
-                // Setup the titel table for the selected onderwerp
-                titelTableSorter.clearSortingState( );
-                titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
-                        titelFilterTextField.getText( ),
-                        opmerkingenFilterTextField.getText( ),
-                        selectedAuteursId,
-                        selectedOnderwerpId,
-                        selectedVormId,
-                        selectedTaalId );
-            }
-        }
-        onderwerpComboBox.addActionListener( new SelectOnderwerpActionListener( ) );
+            // Setup the titel table for the selected onderwerp
+            titelTableSorter.clearSortingState( );
+            titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
+                                                  titelFilterTextField.getText( ),
+                                                  opmerkingenFilterTextField.getText( ),
+                                                  selectedAuteursId,
+                                                  selectedOnderwerpId,
+                                                  selectedVormId,
+                                                  selectedTaalId );
+        } );
 
 
         /////////////////////////////////
         // Vorm Combo Box
         /////////////////////////////////
 
+        constraints.insets = new Insets( 5, 20, 5, 5 );
         constraints.gridx = 0;
         constraints.gridy = 5;
         constraints.anchor = GridBagConstraints.EAST;
+        constraints.weightx = 0;
+        constraints.fill = GridBagConstraints.NONE;
         container.add( new JLabel( "Vorm:" ), constraints );
 
         // Setup a JComboBox for vorm
         vormComboBox = new VormComboBox( connection );
+        constraints.insets = new Insets( 5, 5, 5, 20 );
         constraints.gridx = GridBagConstraints.RELATIVE;
         constraints.anchor = GridBagConstraints.WEST;
         container.add( vormComboBox, constraints );
 
-        class SelectVormActionListener implements ActionListener {
-            public void actionPerformed( ActionEvent actionEvent ) {
-                // Get the selected vorm ID from the combo box
-                selectedVormId = vormComboBox.getSelectedVormId( );
+        vormComboBox.addActionListener( ( ActionEvent actionEvent ) -> {
+            // Get the selected vorm ID from the combo box
+            selectedVormId = vormComboBox.getSelectedVormId( );
 
-                // Setup the titel table for the selected vorm
-                titelTableSorter.clearSortingState( );
-                titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
-                        titelFilterTextField.getText( ),
-                        opmerkingenFilterTextField.getText( ),
-                        selectedAuteursId,
-                        selectedOnderwerpId,
-                        selectedVormId,
-                        selectedTaalId );
-            }
-        }
-        vormComboBox.addActionListener( new SelectVormActionListener( ) );
+            // Setup the titel table for the selected vorm
+            titelTableSorter.clearSortingState( );
+            titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
+                                                  titelFilterTextField.getText( ),
+                                                  opmerkingenFilterTextField.getText( ),
+                                                  selectedAuteursId,
+                                                  selectedOnderwerpId,
+                                                  selectedVormId,
+                                                  selectedTaalId );
+
+        } );
 
 
         /////////////////////////////////
         // Taal Combo Box
         /////////////////////////////////
 
+        constraints.insets = new Insets( 5, 20, 5, 5 );
         constraints.gridx = 0;
         constraints.gridy = 6;
         constraints.anchor = GridBagConstraints.EAST;
-        constraints.anchor = GridBagConstraints.EAST;
+        constraints.weightx = 0;
+        constraints.fill = GridBagConstraints.NONE;
         container.add( new JLabel( "Taal:" ), constraints );
 
         // Setup a JComboBox for taal
         taalComboBox = new TaalComboBox( connection );
+        constraints.insets = new Insets( 5, 5, 5, 20 );
         constraints.gridx = GridBagConstraints.RELATIVE;
         constraints.anchor = GridBagConstraints.WEST;
         container.add( taalComboBox, constraints );
 
-        class SelectTaalActionListener implements ActionListener {
-            public void actionPerformed( ActionEvent actionEvent ) {
-                // Get the selected taal ID from the combo box
-                selectedTaalId = taalComboBox.getSelectedTaalId( );
+        taalComboBox.addActionListener( ( ActionEvent actionEvent ) -> {
+            // Get the selected taal ID from the combo box
+            selectedTaalId = taalComboBox.getSelectedTaalId( );
 
-                // Setup the titel table for the selected taal
-                titelTableSorter.clearSortingState( );
-                titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
-                        titelFilterTextField.getText( ),
-                        opmerkingenFilterTextField.getText( ),
-                        selectedAuteursId,
-                        selectedOnderwerpId,
-                        selectedVormId,
-                        selectedTaalId );
-            }
-        }
-        taalComboBox.addActionListener( new SelectTaalActionListener( ) );
+            // Setup the titel table for the selected taal
+            titelTableSorter.clearSortingState( );
+            titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
+                                                  titelFilterTextField.getText( ),
+                                                  opmerkingenFilterTextField.getText( ),
+                                                  selectedAuteursId,
+                                                  selectedOnderwerpId,
+                                                  selectedVormId,
+                                                  selectedTaalId );
+        } );
 
 
         // Define the edit, cancel, save and delete buttons
@@ -297,7 +302,7 @@ public class TitelFrame {
                 cancelTitelButton,
                 saveTitelButton );
         titelTableSorter = new TableSorter( titelTableModel );
-        titelTable = new JTable( titelTableSorter );
+        final JTable titelTable = new JTable( titelTableSorter );
         titelTableSorter.setTableHeader( titelTable.getTableHeader( ) );
         // titelTableSorter.setSortingStatus( 0, TableSorter.DESCENDING );
 
@@ -325,26 +330,25 @@ public class TitelFrame {
         titelTable.getColumnModel( ).getColumn( 5 ).setCellEditor( taalDefaultCellEditor );
 
         // Set vertical size just enough for 20 entries
-        titelTable.setPreferredScrollableViewportSize( new Dimension( 900, 320 ) );
+        titelTable.setPreferredScrollableViewportSize( new Dimension( 1360, 320 ) );
 
-
+        constraints.insets = new Insets( 5, 20, 5, 20 );
         constraints.gridx = 0;
         constraints.gridy = 7;
         constraints.gridwidth = 2;
         constraints.anchor = GridBagConstraints.CENTER;
         // constraints.insets = new Insets( 10, 5, 5, 5 );
         // Setting weighty and fill is necessary for proper filling the frame when resized.
-        constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
+        constraints.weightx = 1d;
+        constraints.weighty = 1d;
         constraints.fill = GridBagConstraints.BOTH;
         container.add( new JScrollPane( titelTable ), constraints );
-
 
         // Get the selection model related to the rekening_mutatie table
         final ListSelectionModel titelListSelectionModel = titelTable.getSelectionModel( );
 
         class TitelListSelectionListener implements ListSelectionListener {
-            int selectedRow = -1;
+            private int selectedRow = -1;
 
             public void valueChanged( ListSelectionEvent listSelectionEvent ) {
                 // Ignore extra messages.
@@ -412,7 +416,7 @@ public class TitelFrame {
                 deleteTitelButton.setEnabled( true );
             }
 
-            public int getSelectedRow( ) {
+            int getSelectedRow( ) {
                 return selectedRow;
             }
         }
@@ -434,30 +438,29 @@ public class TitelFrame {
                     System.exit( 0 );
                 } else if ( actionEvent.getActionCommand( ).equals( "insert" ) ) {
                     // Insert new titel record
-                    EditTitelDialog editTitelDialog =
-                            new EditTitelDialog( connection, frame,
-                                    titelFilterTextField.getText( ),
-                                    boekFilterTextField.getText( ),
-                                    selectedAuteursId,
-                                    selectedOnderwerpId,
-                                    selectedVormId,
-                                    selectedTaalId );
+                    new EditTitelDialog( connection, frame,
+                                         titelFilterTextField.getText( ),
+                                         boekFilterTextField.getText( ),
+                                         selectedAuteursId,
+                                         selectedOnderwerpId,
+                                         selectedVormId,
+                                         selectedTaalId );
 
                     // Records may have been modified: setup the table model again
                     titelTableSorter.clearSortingState( );
                     titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
-                            titelFilterTextField.getText( ),
-                            opmerkingenFilterTextField.getText( ),
-                            selectedAuteursId,
-                            selectedOnderwerpId,
-                            selectedVormId,
-                            selectedTaalId );
+                                                          titelFilterTextField.getText( ),
+                                                          opmerkingenFilterTextField.getText( ),
+                                                          selectedAuteursId,
+                                                          selectedOnderwerpId,
+                                                          selectedVormId,
+                                                          selectedTaalId );
                 } else {
                     int selectedRow = titelListSelectionListener.getSelectedRow( );
                     if ( selectedRow < 0 ) {
                         JOptionPane.showMessageDialog( frame,
                                 "Geen titel geselecteerd",
-                                "Titel frame error",
+                                "titel frame error",
                                 JOptionPane.ERROR_MESSAGE );
                         return;
                     }
@@ -469,25 +472,24 @@ public class TitelFrame {
                     if ( selectedTitelKey == new TitelKey( ) ) {
                         JOptionPane.showMessageDialog( frame,
                                 "Geen titel geselecteerd",
-                                "Titel frame error",
+                                "titel frame error",
                                 JOptionPane.ERROR_MESSAGE );
                         return;
                     }
 
                     if ( actionEvent.getActionCommand( ).equals( "openDialog" ) ) {
                         // Open dialog
-                        EditTitelDialog editTitelDialog =
-                                new EditTitelDialog( connection, frame, selectedTitelKey );
+                        new EditTitelDialog( connection, frame, selectedTitelKey );
 
                         // Records may have been modified: setup the table model again
                         titelTableSorter.clearSortingState( );
                         titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
-                                titelFilterTextField.getText( ),
-                                opmerkingenFilterTextField.getText( ),
-                                selectedAuteursId,
-                                selectedOnderwerpId,
-                                selectedVormId,
-                                selectedTaalId );
+                                                              titelFilterTextField.getText( ),
+                                                              opmerkingenFilterTextField.getText( ),
+                                                              selectedAuteursId,
+                                                              selectedOnderwerpId,
+                                                              selectedVormId,
+                                                              selectedTaalId );
                     } else if ( actionEvent.getActionCommand( ).equals( "delete" ) ) {
                         String titelString = selectedTitelKey.getTitelString( );
                         // Replace null or empty string by single space for messages
@@ -541,12 +543,12 @@ public class TitelFrame {
                         // Records may have been modified: setup the table model again
                         titelTableSorter.clearSortingState( );
                         titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
-                                titelFilterTextField.getText( ),
-                                opmerkingenFilterTextField.getText( ),
-                                selectedAuteursId,
-                                selectedOnderwerpId,
-                                selectedVormId,
-                                selectedTaalId );
+                                                              titelFilterTextField.getText( ),
+                                                              opmerkingenFilterTextField.getText( ),
+                                                              selectedAuteursId,
+                                                              selectedOnderwerpId,
+                                                              selectedVormId,
+                                                              selectedTaalId );
                     } else if ( actionEvent.getActionCommand( ).equals( "edit" ) ) {
                         // Allow to edit the selected row
                         titelTableModel.setEditRow( selectedRow );
@@ -628,11 +630,15 @@ public class TitelFrame {
         closeButton.addActionListener( buttonActionListener );
         buttonPanel.add( closeButton );
 
+        constraints.insets = new Insets( 5, 20, 20, 20 );
         constraints.gridx = 0;
         constraints.gridy = 8;
+        constraints.weightx = 0d;
+        constraints.weighty = 0d;
+        constraints.fill = GridBagConstraints.NONE;
         container.add( buttonPanel, constraints );
 
-        frame.setSize( 980, 720 );
+        frame.setSize( 1420, 720 );
         frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
         frame.setVisible( true );
     }

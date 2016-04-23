@@ -175,7 +175,7 @@ class BoekFrame {
 	final JButton saveBoekButton = new JButton( "Save" );
 	final JButton deleteBoekButton = new JButton( "Delete" );
 
-	// Create boek table from title table model
+	// Create boek table from boek table model
 	boekTableModel = new BoekTableModel( connection,
 					     cancelBoekButton,
 					     saveBoekButton );

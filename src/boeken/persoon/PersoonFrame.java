@@ -91,7 +91,7 @@ class PersoonFrame {
             persoonTableModel.setupPersoonTableModel( persoonFilterTextField.getText() );
         } );
 
-        // Create persoon table from title table model
+        // Create persoon table from persoon table model
 	persoonTableModel = new PersoonTableModel( connection );
 	persoonTableSorter = new TableSorter( persoonTableModel );
 	final JTable persoonTable = new JTable( persoonTableSorter );

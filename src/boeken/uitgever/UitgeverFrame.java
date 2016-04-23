@@ -1,39 +1,34 @@
 // frame to show and select records from uitgever
 
-package boeken.gui;
+package boeken.uitgever;
 
-import java.sql.Connection; 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*; 
+import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.table.*;
 import javax.swing.event.*;
 
-import java.util.*;
 import java.util.logging.*;
 
 import table.*;
 
 
-public class UitgeverFrame {
-    final Logger logger = Logger.getLogger( "boeken.gui.UitgeverFrame" );
+class UitgeverFrame {
+    private final Logger logger = Logger.getLogger( UitgeverFrame.class.getCanonicalName() );
 
-    final Connection connection;
-    final JFrame frame = new JFrame( "Uitgever" );
+    private final JFrame frame = new JFrame( "Uitgever" );
 
-    JTextField uitgeverFilterTextField;
+    private JTextField uitgeverFilterTextField;
 
-    UitgeverTableModel uitgeverTableModel;
-    TableSorter uitgeverTableSorter;
-    JTable uitgeverTable;
+    private UitgeverTableModel uitgeverTableModel;
+    private TableSorter uitgeverTableSorter;
 
 
-    public UitgeverFrame( final Connection connection ) {
-	this.connection = connection;
+    UitgeverFrame( final Connection connection ) {
 
 	// put the controls the content pane
 	Container container = frame.getContentPane();
@@ -41,31 +36,32 @@ public class UitgeverFrame {
 	// Set grid bag layout manager
 	container.setLayout( new GridBagLayout( ) );
 	GridBagConstraints constraints = new GridBagConstraints( );
-	constraints.anchor = GridBagConstraints.WEST;
-	constraints.insets = new Insets( 0, 0, 10, 10 );
 
+	constraints.insets = new Insets( 20, 20, 5, 5 );
 	constraints.gridx = 0;
 	constraints.gridy = 0;
 	constraints.gridwidth = 1;
+        constraints.anchor = GridBagConstraints.EAST;
 	container.add( new JLabel( "Uitgever Filter:" ), constraints );
-	uitgeverFilterTextField = new JTextField( 20 );
 
-	constraints.gridx = GridBagConstraints.RELATIVE;
+	uitgeverFilterTextField = new JTextField( 20 );
+        constraints.insets = new Insets( 20, 5, 5, 40 );
+        constraints.gridx  = GridBagConstraints.RELATIVE;
+        constraints.weightx = 1d;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
 	container.add( uitgeverFilterTextField, constraints );
 
-	class UitgeverFilterActionListener implements ActionListener {
-	    public void actionPerformed( ActionEvent actionEvent ) {
-		// Setup the uitgever table
-		uitgeverTableModel.setupUitgeverTableModel( uitgeverFilterTextField.getText( ) );
-	    }
-	}
-	uitgeverFilterTextField.addActionListener( new UitgeverFilterActionListener( ) );
+	uitgeverFilterTextField.addActionListener( ( ActionEvent actionEvent ) -> {
+            uitgeverTableSorter.clearSortingState();
+            // Setup the uitgever table
+            uitgeverTableModel.setupUitgeverTableModel( uitgeverFilterTextField.getText( ) );
 
+        } );
 
-	// Create uitgever table from title table model
+        // Create uitgever table from uitgever table model
 	uitgeverTableModel = new UitgeverTableModel( connection );
 	uitgeverTableSorter = new TableSorter( uitgeverTableModel );
-	uitgeverTable = new JTable( uitgeverTableSorter );
+	final JTable uitgeverTable = new JTable( uitgeverTableSorter );
 	uitgeverTableSorter.setTableHeader( uitgeverTable.getTableHeader( ) );
 	// uitgeverTableSorter.setSortingStatus( 0, TableSorter.DESCENDING );
 
@@ -79,11 +75,14 @@ public class UitgeverFrame {
 	// Set vertical size just enough for 20 entries
 	uitgeverTable.setPreferredScrollableViewportSize( new Dimension( 550, 320 ) );
 
+        constraints.insets = new Insets( 5, 20, 5, 20 );
 	constraints.gridx = 0;
-	constraints.gridy = 4;
-	constraints.gridwidth = 5;
-	constraints.insets = new Insets( 10, 0, 10, 10 );
+	constraints.gridy = 1;
+	constraints.gridwidth = 2;
 	constraints.anchor = GridBagConstraints.CENTER;
+        constraints.weightx = 1d;
+        constraints.weighty = 1d;
+        constraints.fill    = GridBagConstraints.BOTH;
 	container.add( new JScrollPane( uitgeverTable ), constraints );
 
 
@@ -98,7 +97,7 @@ public class UitgeverFrame {
 	final ListSelectionModel uitgeverListSelectionModel = uitgeverTable.getSelectionModel( );
 
 	class UitgeverListSelectionListener implements ListSelectionListener {
-	    int selectedRow = -1;
+	    private int selectedRow = -1;
 
 	    public void valueChanged( ListSelectionEvent listSelectionEvent ) {
 		// Ignore extra messages.
@@ -116,7 +115,7 @@ public class UitgeverFrame {
 		deleteUitgeverButton.setEnabled( true );
 	    }
 
-	    public int getSelectedRow ( ) { return selectedRow; }
+	    int getSelectedRow ( ) { return selectedRow; }
 	}
 
 	// Add uitgeverListSelectionListener object to the selection model of the musici table
@@ -159,7 +158,7 @@ public class UitgeverFrame {
 			return;
 		    }
 
-		    // Get the selected uitgever id 
+		    // Get the selected uitgever id
 		    int selectedUitgeverId = uitgeverTableModel.getUitgeverId( selectedRow );
 
 		    // Check if uitgever has been selected
@@ -256,14 +255,15 @@ public class UitgeverFrame {
 	closeButton.addActionListener( buttonActionListener );
 	buttonPanel.add( closeButton );
 
+        constraints.insets = new Insets( 5, 20, 20, 20 );
 	constraints.gridx = 0;
-	constraints.gridy = 5;
-	constraints.gridwidth = 3;
-	constraints.insets = new Insets( 10, 0, 0, 10 );
-	constraints.anchor = GridBagConstraints.CENTER;
+	constraints.gridy = 2;
+        constraints.weightx = 0d;
+        constraints.weighty = 0d;
+        constraints.fill    = GridBagConstraints.NONE;
 	container.add( buttonPanel, constraints );
 
-	frame.setSize( 650, 500 );
+	frame.setSize( 610, 500 );
 	frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 	frame.setVisible(true);
     }

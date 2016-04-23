@@ -136,7 +136,7 @@ public class AuteursComboBox extends JComboBox< String > {
     }
 
 
-    String filterAuteursComboBox( ) {
+    public String filterAuteursComboBox( ) {
         String newAuteursFilterString = null;
 
         // Prompt for the auteurs filter, using the current value as default
@@ -188,7 +188,7 @@ public class AuteursComboBox extends JComboBox< String > {
     }
 
 
-    int getSelectedAuteursId( ) {
+    public int getSelectedAuteursId( ) {
         String auteursString = ( String )getSelectedItem( );
 
         if ( auteursString == null ) return 0;

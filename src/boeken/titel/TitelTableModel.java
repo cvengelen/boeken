@@ -1,30 +1,32 @@
 // Class to setup a TableModel for records in titel
 
-package boeken.gui;
+package boeken.titel;
+
+import boeken.gui.OnderwerpComboBox;
+import boeken.gui.TaalComboBox;
+import boeken.gui.TitelKey;
+import boeken.gui.VormComboBox;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
-import java.text.*;
 import java.util.*;
 import java.util.logging.*;
 import java.util.regex.*;
 
 
-public class TitelTableModel extends AbstractTableModel {
-    final Logger logger = Logger.getLogger( "boeken.gui.TitelTableModel" );
+class TitelTableModel extends AbstractTableModel {
+    private final Logger logger = Logger.getLogger( "boeken.titel.TitelTableModel" );
 
     private Connection connection;
-    private String[ ] headings = { "Titel", "Auteur", "Jaar copyright", "Onderwerp",
-				   "Vorm", "Taal", "Opmerkingen", "Boek" };
+    private final String[ ] headings = { "Titel", "Auteur", "Jaar copyright", "Onderwerp",
+                                         "Vorm", "Taal", "Opmerkingen", "Boek" };
 
-    class TitelRecord {
+    private class TitelRecord {
 	String  titelString;
 	String  persoonString;
 	int	copyrightJaar;
@@ -39,19 +41,19 @@ public class TitelTableModel extends AbstractTableModel {
 	int	auteursId;
 	int	boekId;
 
-	public TitelRecord( String  titelString,
-			    String  persoonString,
-			    int     copyrightJaar,
-			    int     onderwerpId,
-			    String  onderwerpString,
-			    int     vormId,
-			    String  vormString,
-			    int     taalId,
-			    String  taalString,
-			    String  opmerkingenString,
-			    String  boekString,
-			    int     auteursId,
-			    int     boekId ) {
+	TitelRecord( String  titelString,
+                     String  persoonString,
+                     int     copyrightJaar,
+                     int     onderwerpId,
+                     String  onderwerpString,
+                     int     vormId,
+                     String  vormString,
+                     int     taalId,
+                     String  taalString,
+                     String  opmerkingenString,
+                     String  boekString,
+                     int     auteursId,
+                     int     boekId ) {
 	    this.titelString = titelString;
 	    this.persoonString = persoonString;
 	    this.copyrightJaar = copyrightJaar;
@@ -68,7 +70,7 @@ public class TitelTableModel extends AbstractTableModel {
 	}
 
 	// Copy constructor
-	public TitelRecord( TitelRecord titelRecord ) {
+	TitelRecord( TitelRecord titelRecord ) {
 	    this.titelString = titelRecord.titelString;
 	    this.persoonString = titelRecord.persoonString;
 	    this.copyrightJaar = titelRecord.copyrightJaar;
@@ -85,29 +87,29 @@ public class TitelTableModel extends AbstractTableModel {
 	}
     }
 
-    ArrayList titelRecordList = new ArrayList( 500 );
+    private final ArrayList<TitelRecord> titelRecordList = new ArrayList<>( 500 );
 
-    OnderwerpComboBox onderwerpComboBox;
-    VormComboBox vormComboBox;
-    TaalComboBox taalComboBox;
+    private OnderwerpComboBox onderwerpComboBox;
+    private VormComboBox vormComboBox;
+    private TaalComboBox taalComboBox;
 
-    JButton cancelTitelButton;
-    JButton saveTitelButton;
+    private JButton cancelTitelButton;
+    private JButton saveTitelButton;
 
-    boolean	rowModified = false;
-    int		editRow = -1;
-    TitelRecord	titelRecord = null;
-    TitelRecord	originalTitelRecord = null;
+    private boolean	rowModified = false;
+    private int		editRow = -1;
+    private TitelRecord	titelRecord = null;
+    private TitelRecord	originalTitelRecord = null;
 
     // Pattern to find a single quote in the titel, to be replaced
     // with escaped quote (the double slashes are really necessary)
-    final Pattern quotePattern = Pattern.compile( "\\'" );
+    private final Pattern quotePattern = Pattern.compile( "\\'" );
 
 
     // Constructor
-    public TitelTableModel( final Connection connection,
-			    final JButton    cancelTitelButton,
-			    final JButton    saveTitelButton ) {
+    TitelTableModel( final Connection connection,
+                     final JButton    cancelTitelButton,
+                     final JButton    saveTitelButton ) {
 	this.connection = connection;
 	this.cancelTitelButton = cancelTitelButton;
 	this.saveTitelButton = saveTitelButton;
@@ -120,14 +122,14 @@ public class TitelTableModel extends AbstractTableModel {
 	setupTitelTableModel( null, null, null, 0, 0, 0, 0 );
     }
 
-    public void setupTitelTableModel( String boekFilterString,
-				      String titelFilterString,
-				      String opmerkingenFilterString,
-				      int    auteursId,
-				      int    onderwerpId,
-				      int    vormId,
-				      int    taalId ) {
-	// Setup the table
+    // Setup the table
+    void setupTitelTableModel( String boekFilterString,
+                               String titelFilterString,
+                               String opmerkingenFilterString,
+                               int    auteursId,
+                               int    onderwerpId,
+                               int    vormId,
+                               int    taalId ) {
 	try {
 	    String titelQueryString =
 		"SELECT titel.titel, persoon.persoon, " +
@@ -284,12 +286,11 @@ public class TitelTableModel extends AbstractTableModel {
 	    return null;
 	}
 
-	final TitelRecord titelRecord =
-	    ( TitelRecord )titelRecordList.get( row );
+	final TitelRecord titelRecord = titelRecordList.get( row );
 
 	if ( column == 0 ) return titelRecord.titelString;
 	if ( column == 1 ) return titelRecord.persoonString;
-	if ( column == 2 ) return new Integer( titelRecord.copyrightJaar );
+	if ( column == 2 ) return titelRecord.copyrightJaar;
 	if ( column == 3 ) return titelRecord.onderwerpString;
 	if ( column == 4 ) return titelRecord.vormString;
 	if ( column == 5 ) return titelRecord.taalString;
@@ -322,7 +323,7 @@ public class TitelTableModel extends AbstractTableModel {
 
 	    case 2:
 		int copyrightJaar = 0;
-		if ( object != null ) copyrightJaar = ( ( Integer )object ).intValue( );
+		if ( object != null ) copyrightJaar = ( Integer )object;
 		if ( ( copyrightJaar == 0 ) && ( titelRecord.copyrightJaar != 0 ) ) {
 		    titelRecord.copyrightJaar = 0;
 		    rowModified = true;
@@ -399,29 +400,28 @@ public class TitelTableModel extends AbstractTableModel {
 	return headings[ column ];
     }
 
-    public int getNumberOfRecords( ) { return titelRecordList.size( ); }
+    int getNumberOfRecords( ) { return titelRecordList.size( ); }
 
-    public TitelKey getTitelKey( int row ) {
+    TitelKey getTitelKey( int row ) {
 	final TitelKey nullTitelKey = new TitelKey( );
 
-	final TitelRecord titelRecord =
-	    ( TitelRecord )titelRecordList.get( row );
+	final TitelRecord titelRecord = titelRecordList.get( row );
 
-	String titelString = ( String )( titelRecord.titelString );
+	String titelString = titelRecord.titelString;
 
 	if ( titelString == null ) return nullTitelKey;
 	if ( titelString.length( ) == 0 ) return nullTitelKey;
 
-	int auteursId = ( int )( titelRecord.auteursId );
-	int boekId = ( int )( titelRecord.boekId );
+	int auteursId = titelRecord.auteursId;
+	int boekId = titelRecord.boekId;
 
 	return new TitelKey( boekId, auteursId, titelString );
     }
 
 
-    public void setEditRow( int editRow ) {
+    void setEditRow( int editRow ) {
 	// Initialize record to be edited
-	titelRecord = ( TitelRecord )titelRecordList.get( editRow );
+	titelRecord = titelRecordList.get( editRow );
 
 	// Copy record to use as key in table update
 	originalTitelRecord = new TitelRecord( titelRecord );
@@ -433,11 +433,11 @@ public class TitelTableModel extends AbstractTableModel {
 	this.editRow = editRow;
     }
 
-    public void unsetEditRow( ) {
+    void unsetEditRow( ) {
 	this.editRow = -1;
     }
 
-    public void cancelEditRow( int row ) {
+    void cancelEditRow( int row ) {
 	// Check if row being canceled equals the row currently being edited
 	if ( row != editRow ) return;
 
@@ -461,9 +461,8 @@ public class TitelTableModel extends AbstractTableModel {
 	return additionalUpdateString;
     }
 
-    public boolean saveEditRow( int row ) {
+    boolean saveEditRow( int row ) {
 	String updateString = null;
-	boolean updateId = false;
 
 	// Compare each field with the value in the original record
 	// If modified, add entry to update query string
@@ -574,5 +573,5 @@ public class TitelTableModel extends AbstractTableModel {
 	}
     }
 
-    public boolean getRowModified( ) { return rowModified; }
+    boolean getRowModified( ) { return rowModified; }
 }

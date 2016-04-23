@@ -94,7 +94,7 @@ class AuteursFrame {
             auteursTableModel.setupAuteursTableModel( auteursFilterTextField.getText() );
         } );
 
-	// Create auteurs table from title table model
+	// Create auteurs table from auteurs table model
 	auteursTableModel = new AuteursTableModel( connection );
 	auteursTableSorter = new TableSorter( auteursTableModel );
 	JTable auteursTable = new JTable( auteursTableSorter );

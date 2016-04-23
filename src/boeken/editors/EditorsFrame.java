@@ -94,7 +94,7 @@ class EditorsFrame {
             editorsTableModel.setupEditorsTableModel( editorsFilterTextField.getText() );
         } );
 
-	// Create editors table from title table model
+	// Create editors table from editors table model
 	editorsTableModel = new EditorsTableModel( connection );
 	editorsTableSorter = new TableSorter( editorsTableModel );
 	final JTable editorsTable = new JTable( editorsTableSorter );

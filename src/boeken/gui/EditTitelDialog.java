@@ -466,7 +466,7 @@ public class EditTitelDialog {
 
 	constraints.gridx = 0;
 	constraints.gridy = 13;
-	container.add( new JLabel( "Originele Titel:" ), constraints );
+	container.add( new JLabel( "Originele titel:" ), constraints );
 	orgTitelTextField = new JTextField( defaultOrgTitelString, 55 );
 
 	constraints.gridx = GridBagConstraints.RELATIVE;
@@ -629,7 +629,7 @@ public class EditTitelDialog {
 	if ( titelString == null || titelString.length( ) == 0 ) {
 	    JOptionPane.showMessageDialog( dialog,
 					   "Titel niet ingevuld",
-					   "Insert Titel error",
+					   "Insert titel error",
 					   JOptionPane.ERROR_MESSAGE);
 	    return false;
 	}
@@ -738,7 +738,7 @@ public class EditTitelDialog {
 	    if ( titelString == null || titelString.length( ) == 0 ) {
 		JOptionPane.showMessageDialog( dialog,
 					       "Titel niet ingevuld",
-					       "Insert Titel error",
+					       "Insert titel error",
 					       JOptionPane.ERROR_MESSAGE);
 		return false;
 	    }

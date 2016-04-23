@@ -1,38 +1,35 @@
 // frame to show and select records from vertalers
 
-package boeken.gui;
+package boeken.vertalers;
 
-import java.sql.Connection; 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import java.awt.*; 
+import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.table.*;
 import javax.swing.event.*;
 
-import java.util.*;
 import java.util.logging.*;
 
+import boeken.gui.EditVertalersDialog;
 import table.*;
 
 
-public class VertalersFrame {
-    final Logger logger = Logger.getLogger( "boeken.gui.VertalersFrame" );
+class VertalersFrame {
+    private final Logger logger = Logger.getLogger( VertalersFrame.class.getCanonicalName() );
 
-    final Connection connection;
-    final JFrame frame = new JFrame( "Vertalers" );
+    private final Connection connection;
+    private final JFrame frame = new JFrame( "Vertalers" );
 
-    JTextField vertalersFilterTextField;
+    private JTextField vertalersFilterTextField;
 
-    VertalersTableModel vertalersTableModel;
-    TableSorter vertalersTableSorter;
-    JTable vertalersTable;
+    private VertalersTableModel vertalersTableModel;
+    private TableSorter vertalersTableSorter;
 
-
-    class Vertalers {
+    private class Vertalers {
 	int	id;
 	String  string;
 
@@ -42,7 +39,7 @@ public class VertalersFrame {
 	    this.string = string;
 	}
 
-	public boolean presentInTable( String tableString ) {
+	boolean presentInTable( String tableString ) {
 	    // Check if vertalersId is present in table
 	    try {
 		Statement statement = connection.createStatement( );
@@ -64,8 +61,7 @@ public class VertalersFrame {
 	}
     }
 
-
-    public VertalersFrame( final Connection connection ) {
+    VertalersFrame( final Connection connection ) {
 	this.connection = connection;
 
 	// put the controls the content pane
@@ -74,31 +70,33 @@ public class VertalersFrame {
 	// Set grid bag layout manager
 	container.setLayout( new GridBagLayout( ) );
 	GridBagConstraints constraints = new GridBagConstraints( );
-	constraints.anchor = GridBagConstraints.WEST;
-	constraints.insets = new Insets( 0, 0, 10, 10 );
 
-	constraints.gridx = 0;
+	constraints.insets = new Insets( 20, 20, 5, 5 );
+        constraints.gridx = 0;
 	constraints.gridy = 0;
 	constraints.gridwidth = 1;
+        constraints.anchor = GridBagConstraints.EAST;
 	container.add( new JLabel( "Vertalers Filter:" ), constraints );
 	vertalersFilterTextField = new JTextField( 20 );
 
+        constraints.insets = new Insets( 20, 5, 5, 40 );
 	constraints.gridx = GridBagConstraints.RELATIVE;
+        constraints.anchor = GridBagConstraints.WEST;
+        constraints.weightx = 1d;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
 	container.add( vertalersFilterTextField, constraints );
 
-	class VertalersFilterActionListener implements ActionListener {
-	    public void actionPerformed( ActionEvent actionEvent ) {
-		// Setup the vertalers table
-		vertalersTableModel.setupVertalersTableModel( vertalersFilterTextField.getText( ) );
-	    }
-	}
-	vertalersFilterTextField.addActionListener( new VertalersFilterActionListener( ) );
+	vertalersFilterTextField.addActionListener( ( ActionEvent actionEvent ) -> {
+            vertalersTableSorter.clearSortingState();
+            // Setup the vertalers table
+            vertalersTableModel.setupVertalersTableModel( vertalersFilterTextField.getText() );
+        } );
 
 
-	// Create vertalers table from title table model
+	// Create vertalers table from vertalers table model
 	vertalersTableModel = new VertalersTableModel( connection );
 	vertalersTableSorter = new TableSorter( vertalersTableModel );
-	vertalersTable = new JTable( vertalersTableSorter );
+	final JTable vertalersTable = new JTable( vertalersTableSorter );
 	vertalersTableSorter.setTableHeader( vertalersTable.getTableHeader( ) );
 	// vertalersTableSorter.setSortingStatus( 0, TableSorter.DESCENDING );
 
@@ -111,10 +109,13 @@ public class VertalersFrame {
 	// Set vertical size just enough for 20 entries
 	vertalersTable.setPreferredScrollableViewportSize( new Dimension( 400, 320 ) );
 
+        constraints.insets = new Insets( 5, 20, 5, 20 );
 	constraints.gridx = 0;
-	constraints.gridy = 4;
-	constraints.gridwidth = 5;
-	constraints.insets = new Insets( 10, 0, 10, 10 );
+	constraints.gridy = 1;
+	constraints.gridwidth = 2;
+        constraints.weightx = 1d;
+        constraints.weighty = 1d;
+        constraints.fill = GridBagConstraints.BOTH;
 	constraints.anchor = GridBagConstraints.CENTER;
 	container.add( new JScrollPane( vertalersTable ), constraints );
 
@@ -127,7 +128,7 @@ public class VertalersFrame {
 	final ListSelectionModel vertalersListSelectionModel = vertalersTable.getSelectionModel( );
 
 	class VertalersListSelectionListener implements ListSelectionListener {
-	    int selectedRow = -1;
+	    private int selectedRow = -1;
 
 	    public void valueChanged( ListSelectionEvent listSelectionEvent ) {
 		// Ignore extra messages.
@@ -147,7 +148,7 @@ public class VertalersFrame {
 		deleteVertalersButton.setEnabled( true );
 	    }
 
-	    public int getSelectedRow ( ) { return selectedRow; }
+	    int getSelectedRow ( ) { return selectedRow; }
 	}
 
 	// Add vertalersListSelectionListener object to the selection model of the musici table
@@ -162,9 +163,8 @@ public class VertalersFrame {
 		    System.exit( 0 );
 		} else if ( actionEvent.getActionCommand( ).equals( "insert" ) ) {
 		    // Insert new vertalers record
-		    EditVertalersDialog editVertalersDialog =
-			new EditVertalersDialog( connection, frame,
-						 vertalersFilterTextField.getText( ) );
+		    new EditVertalersDialog( connection, frame,
+                                             vertalersFilterTextField.getText( ) );
 		} else {
 		    int selectedRow = vertalersListSelectionListener.getSelectedRow( );
 		    if ( selectedRow < 0 ) {
@@ -175,7 +175,7 @@ public class VertalersFrame {
 			return;
 		    }
 
-		    // Get the selected vertalers id 
+		    // Get the selected vertalers id
 		    int selectedVertalersId = vertalersTableModel.getVertalersId( selectedRow );
 
 		    // Check if vertalers has been selected
@@ -189,8 +189,7 @@ public class VertalersFrame {
 
 		    if ( actionEvent.getActionCommand( ).equals( "edit" ) ) {
 			// Do dialog
-			EditVertalersDialog editVertalersDialog =
-			    new EditVertalersDialog( connection, frame, selectedVertalersId );
+			new EditVertalersDialog( connection, frame, selectedVertalersId );
 		    } else if ( actionEvent.getActionCommand( ).equals( "delete" ) ) {
 			final Vertalers vertalers = new Vertalers( vertalersTableModel.getVertalersId( selectedRow ),
 								   vertalersTableModel.getVertalersString( selectedRow ) );
@@ -271,14 +270,16 @@ public class VertalersFrame {
 	closeButton.addActionListener( buttonActionListener );
 	buttonPanel.add( closeButton );
 
+        constraints.insets = new Insets( 5, 20, 20, 20 );
 	constraints.gridx = 0;
-	constraints.gridy = 5;
-	constraints.gridwidth = 3;
-	constraints.insets = new Insets( 10, 0, 0, 10 );
+	constraints.gridy = 2;
+        constraints.weightx = 0d;
+        constraints.weighty = 0d;
+        constraints.fill = GridBagConstraints.NONE;
 	constraints.anchor = GridBagConstraints.CENTER;
 	container.add( buttonPanel, constraints );
 
-	frame.setSize( 600, 500 );
+	frame.setSize( 460, 500 );
 	frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 	frame.setVisible(true);
     }
