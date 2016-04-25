@@ -1,5 +1,3 @@
-// frame to show and select records from label
-
 package boeken.label;
 
 import java.sql.Connection;
@@ -16,18 +14,19 @@ import java.util.logging.*;
 
 import table.*;
 
-
+/**
+ * Frame to show, insert and update records in the label table in schema boeken.
+ * An instance of LabelFrame is created by class boeken.Main.
+ */
 public class LabelFrame {
     private final Logger logger = Logger.getLogger( LabelFrame.class.getCanonicalName() );
 
-    private final Connection connection;
     private final JFrame frame = new JFrame( "Label" );
 
     private LabelTableModel labelTableModel;
     private TableSorter labelTableSorter;
 
-    LabelFrame( final Connection connection ) {
-	this.connection = connection;
+    public LabelFrame( final Connection connection ) {
 
 	// put the controls the content pane
 	Container container = frame.getContentPane();

@@ -1,5 +1,3 @@
-// frame to show and select records from editors
-
 package boeken.editors;
 
 import java.sql.Connection;
@@ -17,8 +15,11 @@ import java.util.logging.*;
 import boeken.gui.EditEditorsDialog;
 import table.*;
 
-
-class EditorsFrame {
+/**
+ * Frame to show, insert and update records in the editors table in schema boeken.
+ * An instance of EditorsFrame is created by class boeken.Main.
+ */
+public class EditorsFrame {
     private final Logger logger = Logger.getLogger( "boeken.editors.EditorsFrame" );
 
     private final Connection connection;
@@ -28,7 +29,6 @@ class EditorsFrame {
 
     private EditorsTableModel editorsTableModel;
     private TableSorter editorsTableSorter;
-
 
     private class Editors {
 	int	id;
@@ -62,8 +62,7 @@ class EditorsFrame {
 	}
     }
 
-
-    EditorsFrame( final Connection connection ) {
+    public EditorsFrame( final Connection connection ) {
 	this.connection = connection;
 
 	// put the controls the content pane

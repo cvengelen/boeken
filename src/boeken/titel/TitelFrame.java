@@ -1,5 +1,3 @@
-// frame to show records in titel table
-
 package boeken.titel;
 
 import java.sql.Connection;
@@ -18,8 +16,11 @@ import java.util.regex.*;
 import boeken.gui.*;
 import table.*;
 
-
-class TitelFrame {
+/**
+ * Frame to show, insert and update records in the titel table in schema boeken.
+ * An instance of TitelFrame is created by class boeken.Main.
+ */
+public class TitelFrame {
     private final Logger logger = Logger.getLogger( TitelFrame.class.getCanonicalName() );
 
     private final JFrame frame = new JFrame( "Titel" );
@@ -47,8 +48,7 @@ class TitelFrame {
     // with escaped quote (the double slashes are really necessary)
     private final Pattern quotePattern = Pattern.compile( "\\'" );
 
-
-    TitelFrame( final Connection connection ) {
+    public TitelFrame( final Connection connection ) {
 
         // put the controls the content pane
         Container container = frame.getContentPane( );

@@ -1,5 +1,3 @@
-// frame to show and select records from boek
-
 package boeken.boek;
 
 import java.sql.Connection;
@@ -17,8 +15,11 @@ import java.util.logging.*;
 import boeken.gui.*;
 import table.*;
 
-
-class BoekFrame {
+/**
+ * Frame to show, insert and update records in the boek table in schema boeken.
+ * An instance of BoekFrame is created by class boeken.Main.
+ */
+public class BoekFrame {
     private final Logger logger = Logger.getLogger( BoekFrame.class.getCanonicalName() );
 
     private final JFrame frame = new JFrame( "Boek");
@@ -38,7 +39,7 @@ class BoekFrame {
     private TableSorter boekTableSorter;
 
 
-    BoekFrame( final Connection connection ) {
+    public BoekFrame( final Connection connection ) {
 
 	// put the controls the content pane
 	Container container = frame.getContentPane();

@@ -1,5 +1,3 @@
-// frame to show and select records from uitgever
-
 package boeken.uitgever;
 
 import java.sql.Connection;
@@ -16,8 +14,11 @@ import java.util.logging.*;
 
 import table.*;
 
-
-class UitgeverFrame {
+/**
+ * Frame to show, insert and update records in the uitgever table in schema boeken.
+ * An instance of UitgeverFrame is created by class boeken.Main.
+ */
+public class UitgeverFrame {
     private final Logger logger = Logger.getLogger( UitgeverFrame.class.getCanonicalName() );
 
     private final JFrame frame = new JFrame( "Uitgever" );
@@ -27,8 +28,7 @@ class UitgeverFrame {
     private UitgeverTableModel uitgeverTableModel;
     private TableSorter uitgeverTableSorter;
 
-
-    UitgeverFrame( final Connection connection ) {
+    public UitgeverFrame( final Connection connection ) {
 
 	// put the controls the content pane
 	Container container = frame.getContentPane();

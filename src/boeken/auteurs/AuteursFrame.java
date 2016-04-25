@@ -1,5 +1,3 @@
-// frame to show and select records from auteurs
-
 package boeken.auteurs;
 
 import java.sql.Connection;
@@ -17,8 +15,11 @@ import java.util.logging.*;
 import boeken.gui.EditAuteursDialog;
 import table.*;
 
-
-class AuteursFrame {
+/**
+ * Frame to show, insert and update records in the auteurs table in schema boeken.
+ * An instance of AuteursFrame is created by class boeken.Main.
+ */
+public class AuteursFrame {
     private final Logger logger = Logger.getLogger(AuteursFrame.class.getCanonicalName());
 
     private final Connection connection;
@@ -61,10 +62,10 @@ class AuteursFrame {
 	}
     }
 
-    AuteursFrame( final Connection connection ) {
+    public AuteursFrame( final Connection connection ) {
 	this.connection = connection;
 
-	// put the controls the content pane
+        // put the controls the content pane
 	Container container = frame.getContentPane();
 
 	// Set grid bag layout manager

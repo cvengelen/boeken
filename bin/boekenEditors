@@ -1,1 +1,2 @@
-java -cp /Users/cvengelen/Java/boeken/build/boeken.jar:${JAVA_LIBS}/table.jar -Djava.util.logging.config.file=/Users/cvengelen/java/boeken/resources/logging.properties boeken.editors.Editors
+# Start boeken.Main, met boeken.editors.EditorsFrame als argument
+java -cp /Users/cvengelen/Java/boeken/build/boeken.jar:${JAVA_LIBS}/table.jar -Djava.util.logging.config.file=/Users/cvengelen/java/boeken/resources/logging.properties boeken.Main boeken.editors.EditorsFrame

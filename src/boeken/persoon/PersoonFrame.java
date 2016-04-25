@@ -1,5 +1,3 @@
-// frame to show and select records from persoon
-
 package boeken.persoon;
 
 import java.sql.Connection;
@@ -16,8 +14,11 @@ import java.util.logging.*;
 
 import table.*;
 
-
-class PersoonFrame {
+/**
+ * Frame to show, insert and update records in the persoon table in schema boeken.
+ * An instance of PersoonFrame is created by class boeken.Main.
+ */
+public class PersoonFrame {
     private final Logger logger = Logger.getLogger( PersoonFrame.class.getCanonicalName() );
 
     private final Connection connection;
@@ -58,8 +59,7 @@ class PersoonFrame {
 	}
     }
 
-
-    PersoonFrame( final Connection connection ) {
+    public PersoonFrame( final Connection connection ) {
 	this.connection = connection;
 
 	// put the controls the content pane

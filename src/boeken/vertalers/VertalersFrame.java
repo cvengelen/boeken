@@ -1,5 +1,3 @@
-// frame to show and select records from vertalers
-
 package boeken.vertalers;
 
 import java.sql.Connection;
@@ -17,8 +15,11 @@ import java.util.logging.*;
 import boeken.gui.EditVertalersDialog;
 import table.*;
 
-
-class VertalersFrame {
+/**
+ * Frame to show, insert and update records in the vertalers table in schema boeken.
+ * An instance of VertalersFrame is created by class boeken.Main.
+ */
+public class VertalersFrame {
     private final Logger logger = Logger.getLogger( VertalersFrame.class.getCanonicalName() );
 
     private final Connection connection;
@@ -61,7 +62,7 @@ class VertalersFrame {
 	}
     }
 
-    VertalersFrame( final Connection connection ) {
+    public VertalersFrame( final Connection connection ) {
 	this.connection = connection;
 
 	// put the controls the content pane
