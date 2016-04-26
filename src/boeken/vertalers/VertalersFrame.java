@@ -161,7 +161,8 @@ public class VertalersFrame {
 	    public void actionPerformed( ActionEvent actionEvent ) {
 		if ( actionEvent.getActionCommand( ).equals( "close" ) ) {
 		    frame.setVisible( false );
-		    System.exit( 0 );
+                    frame.dispose();
+                    return;
 		} else if ( actionEvent.getActionCommand( ).equals( "insert" ) ) {
 		    // Insert new vertalers record
 		    new EditVertalersDialog( connection, frame,
@@ -279,6 +280,19 @@ public class VertalersFrame {
         constraints.fill = GridBagConstraints.NONE;
 	constraints.anchor = GridBagConstraints.CENTER;
 	container.add( buttonPanel, constraints );
+
+        // Add a window listener to close the connection when the frame is disposed
+        frame.addWindowListener( new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                try {
+                    // Close the connection to the MySQL database
+                    connection.close( );
+                } catch (SQLException sqlException) {
+                    logger.severe( "SQL exception closing connection: " + sqlException.getMessage() );
+                }
+            }
+        } );
 
 	frame.setSize( 460, 500 );
 	frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );

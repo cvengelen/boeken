@@ -313,7 +313,6 @@ public class BoekFrame {
 	    public void actionPerformed( ActionEvent actionEvent ) {
 		if ( actionEvent.getActionCommand( ).equals( "close" ) ) {
 		    frame.setVisible( false );
-		    // Exit the application gracefully
 		    frame.dispose( );
 		    return;
 		} else if ( actionEvent.getActionCommand( ).equals( "insert" ) ) {
@@ -517,11 +516,21 @@ public class BoekFrame {
         constraints.fill = GridBagConstraints.NONE;
 	container.add( buttonPanel, constraints );
 
+        // Add window listener to close the connection when the frame is disposed
+        frame.addWindowListener( new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                try {
+                    // Close the connection to the MySQL database
+                    connection.close( );
+                } catch (SQLException sqlException) {
+                    logger.severe( "SQL exception closing connection: " + sqlException.getMessage() );
+                }
+            }
+        } );
+
 	frame.setSize( 1080, 600 );
-	// frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-	// frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
-	frame.setDefaultCloseOperation( WindowConstants.HIDE_ON_CLOSE );
+        frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 	frame.setVisible(true);
-	// frame.addWindowListener( new general.gui.FrameWindowListener( frame ) );
     }
 }

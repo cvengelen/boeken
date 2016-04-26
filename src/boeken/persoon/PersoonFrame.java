@@ -158,7 +158,8 @@ public class PersoonFrame {
 	    public void actionPerformed( ActionEvent actionEvent ) {
 		if ( actionEvent.getActionCommand( ).equals( "close" ) ) {
 		    frame.setVisible( false );
-		    System.exit( 0 );
+                    frame.dispose();
+		    return;
 		} else if ( actionEvent.getActionCommand( ).equals( "insert" ) ) {
 		    try {
 			Statement statement = connection.createStatement( );
@@ -281,6 +282,19 @@ public class PersoonFrame {
         constraints.weighty = 0d;
         constraints.fill = GridBagConstraints.NONE;
 	container.add( buttonPanel, constraints );
+
+        // Add a window listener to close the connection when the frame is disposed
+        frame.addWindowListener( new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                try {
+                    // Close the connection to the MySQL database
+                    connection.close( );
+                } catch (SQLException sqlException) {
+                    logger.severe( "SQL exception closing connection: " + sqlException.getMessage() );
+                }
+            }
+        } );
 
 	frame.setSize( 360, 500 );
 	frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );

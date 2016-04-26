@@ -4,9 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Arrays;
 
 /**
- * Show a dialogue for ithe nput of password for the MySQL boeken account,
+ * Show a dialogue for input of the password for the MySQL boeken account,
  * which gives access to schema boeken.
  *
  * See: https://docs.oracle.com/javase/tutorial/uiswing/components/dialog.html
@@ -17,9 +18,8 @@ import java.awt.event.WindowEvent;
  */
 public class PasswordPanel extends JPanel {
     private final JPasswordField passwordField = new JPasswordField(12);
-    private JOptionPane passwordOptionPane;
-    private JDialog passwordDialog;
     private boolean focusRequested;
+    private String password;
 
     public PasswordPanel() {
         super(new FlowLayout());
@@ -27,23 +27,40 @@ public class PasswordPanel extends JPanel {
         add(new JLabel("Password: "));
         add(passwordField);
 
-        passwordOptionPane = new JOptionPane(this, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-        passwordDialog = passwordOptionPane.createDialog("Boeken database");
+        // Use the password input panel in an OK/Cancel option pane
+        JOptionPane passwordOptionPane = new JOptionPane(this, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
 
-        // Use a WindowAdapter object to create a listener for when the dialogue has gained focus
+        // Create a password dialog for the password option pane
+        JDialog passwordDialog = passwordOptionPane.createDialog("Boeken database");
+
+        // Use a WindowAdapter object to create a listener for when the password dialogue has gained focus
         passwordDialog.addWindowFocusListener(new WindowAdapter() {
             @Override
             public void windowGainedFocus(WindowEvent e) {
-                // Let the password panel know that the dialogue has gained focus
+                // Let the password input panel know that the dialogue has gained focus
                 gainedFocus();
             }
         });
 
-        // Start the password dialogue
+        // Show the password dialogue and wait for user input
         passwordDialog.setVisible( true );
+
+        // Check for the OK option
+        if (passwordOptionPane.getValue() != null && passwordOptionPane.getValue().equals(JOptionPane.OK_OPTION)) {
+            // Convert the char[] input to a string
+            password = new String(passwordField.getPassword());
+        }
+
+        // Zero out the password field, for security.
+        Arrays.fill(passwordField.getPassword(), '0');
+
+        // Dispose of all resources used by the password dialogue
+        passwordDialog.dispose();
     }
 
-    // Hook method called when the password dialog gained focus
+    /**
+     * Hook method called when the password dialog gained focus
+     */
     private void gainedFocus() {
         if (!focusRequested) {
             focusRequested = true;
@@ -53,15 +70,8 @@ public class PasswordPanel extends JPanel {
         }
     }
 
-    public String getPassword() {
-        // Dispose of all resources used by the password dialogue
-        passwordDialog.dispose();
-
-        // Check the Cancel option
-        if (passwordOptionPane.getValue() == null || passwordOptionPane.getValue().equals(JOptionPane.CANCEL_OPTION)) {
-            return null;
-        }
-
-        return new String(passwordField.getPassword());
-    }
+    /**
+     * Return the password when the password dialogue is closed withe the OK option, otherwise return null.
+     */
+    public String getPassword() { return password; }
 }

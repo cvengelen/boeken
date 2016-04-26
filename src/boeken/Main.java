@@ -27,39 +27,36 @@ public class Main {
         final String boekenClassName = args[0];
         logger.info( "Starting " + boekenClassName );
 
-        String password = null;
-        Constructor constructor = null;
         try {
             // Load the MySQL JDBC driver
             Class.forName( "com.mysql.jdbc.Driver" );
+        } catch ( ClassNotFoundException classNotFoundException ) {
+            logger.severe( "ClassNotFoundException: " + classNotFoundException.getMessage() );
+            System.exit( 1 );
+        }
 
+        try {
             // Get the password for the boeken account, which gives access to schema boeken.
-            PasswordPanel passwordPanel = new PasswordPanel();
-            password = passwordPanel.getPassword();
+            final PasswordPanel passwordPanel = new PasswordPanel();
+            final String password = passwordPanel.getPassword();
             if (password == null) {
                 logger.info("No password");
                 System.err.println("Geen password gegeven");
                 System.exit( 1 );
             }
 
-            // Find the constructor of the class with name boekenClassName which has Connection as parameter
+            // Find the constructor of the class with name boekenClassName which has a Connection as parameter
             // See: https://docs.oracle.com/javase/tutorial/reflect/class/classNew.html
             // and: http://tutorials.jenkov.com/java-reflection/constructors.html
-            constructor = Class.forName(boekenClassName).getConstructor( Connection.class );
+            final Constructor constructor = Class.forName(boekenClassName).getConstructor( Connection.class );
+
+            // Open a connection to the boeken schema of the MySQL database, and create the frame with the MySQL connection as parameter.
+            // No need to save a reference of the instance: when the frame is finished, the application is finished.
+            constructor.newInstance( DriverManager.getConnection( "jdbc:mysql://localhost/boeken?user=boeken&password=" + password ) );
         } catch ( ClassNotFoundException classNotFoundException ) {
             logger.severe( "ClassNotFoundException: " + classNotFoundException.getMessage( ) );
             System.err.println("Class " + boekenClassName + " bestaat niet.\nControleer de naam van de class, bijvoorbeeld: boeken.titel.TitelFrame");
             System.exit( 1 );
-        } catch ( Exception exception ) {
-            logger.severe( "Exception: " + exception.getMessage( ) );
-            System.exit( 1 );
-        }
-
-        // Use the AutoCloseable interface of Connection to automatically close the connection
-        try (final Connection connection = DriverManager.getConnection( "jdbc:mysql://localhost/boeken?user=boeken&password=" + password )) {
-            // Create an instance of the class with name boekenClassName using Connection as parameter.
-            // No need to save a reference of the instance: when the frame is finished, the application is finished.
-            constructor.newInstance( connection );
         } catch ( SQLException sqlException ) {
             logger.severe( "SQLException: " + sqlException.getMessage( ) );
             System.exit( 1 );

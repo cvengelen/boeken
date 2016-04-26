@@ -66,10 +66,10 @@ public class LabelFrame {
 	labelTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
 
 	labelTable.getColumnModel( ).getColumn( 0 ).setPreferredWidth(  50 );  // Id
-	labelTable.getColumnModel( ).getColumn( 1 ).setPreferredWidth( 150 );  // label
+	labelTable.getColumnModel( ).getColumn( 1 ).setPreferredWidth( 200 );  // label
 
 	// Set vertical size just enough for 20 entries
-	labelTable.setPreferredScrollableViewportSize( new Dimension( 200, 320 ) );
+	labelTable.setPreferredScrollableViewportSize( new Dimension( 250, 320 ) );
 
 	constraints.gridx = 0;
 	constraints.gridy = 1;
@@ -123,7 +123,8 @@ public class LabelFrame {
 	    public void actionPerformed( ActionEvent actionEvent ) {
 		if ( actionEvent.getActionCommand( ).equals( "close" ) ) {
 		    frame.setVisible( false );
-		    System.exit( 0 );
+                    frame.dispose();
+		    return;
 		} else if ( actionEvent.getActionCommand( ).equals( "add" ) ) {
 		    try {
 			Statement statement = connection.createStatement( );
@@ -259,7 +260,20 @@ public class LabelFrame {
         constraints.fill = GridBagConstraints.BOTH;
 	container.add( buttonPanel, constraints );
 
-	frame.setSize( 260, 500 );
+        // Add a window listener to close the connection when the frame is disposed
+        frame.addWindowListener( new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                try {
+                    // Close the connection to the MySQL database
+                    connection.close( );
+                } catch (SQLException sqlException) {
+                    logger.severe( "SQL exception closing connection: " + sqlException.getMessage() );
+                }
+            }
+        } );
+
+        frame.setSize( 310, 500 );
 	frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 	frame.setVisible(true);
     }
