@@ -18,12 +18,9 @@ import table.*;
 
 /**
  * Frame to show, insert and update records in the titel table in schema boeken.
- * An instance of TitelFrame is created by class boeken.Main.
  */
-public class TitelFrame {
-    private final Logger logger = Logger.getLogger( TitelFrame.class.getCanonicalName() );
-
-    private final JFrame frame = new JFrame( "Titel" );
+public class EditTitel extends JInternalFrame {
+    private final Logger logger = Logger.getLogger( EditTitel.class.getCanonicalName() );
 
     private JTextField boekFilterTextField;
     private JTextField titelFilterTextField;
@@ -48,10 +45,13 @@ public class TitelFrame {
     // with escaped quote (the double slashes are really necessary)
     private final Pattern quotePattern = Pattern.compile( "\\'" );
 
-    public TitelFrame( final Connection connection ) {
+    public EditTitel(final Connection connection, JFrame parentFrame, int x, int y ) {
+        super("Edit boek", true, true, true, true);
 
-        // put the controls the content pane
-        Container container = frame.getContentPane( );
+        JInternalFrame thisFrame = this;
+
+        // Get the container from the internal frame
+        final Container container = getContentPane();
 
         // Set grid bag layout manager
         container.setLayout( new GridBagLayout( ) );
@@ -153,7 +153,7 @@ public class TitelFrame {
         auteursPanel.setBorder( emptyBorder );
 
         // Setup a JComboBox with the results of the query on auteurs
-        auteursComboBox = new AuteursComboBox( connection, frame, false );
+        auteursComboBox = new AuteursComboBox( connection, thisFrame, false );
         auteursPanel.add( auteursComboBox );
 
         auteursComboBox.addActionListener( ( ActionEvent actionEvent ) -> {
@@ -298,9 +298,7 @@ public class TitelFrame {
         final JButton deleteTitelButton = new JButton( "Delete" );
 
         // Create titel table from title table model
-        titelTableModel = new TitelTableModel( connection,
-                cancelTitelButton,
-                saveTitelButton );
+        titelTableModel = new TitelTableModel( connection, thisFrame, cancelTitelButton, saveTitelButton );
         titelTableSorter = new TableSorter( titelTableModel );
         final JTable titelTable = new JTable( titelTableSorter );
         titelTableSorter.setTableHeader( titelTable.getTableHeader( ) );
@@ -317,16 +315,16 @@ public class TitelFrame {
         titelTable.getColumnModel( ).getColumn( 6 ).setPreferredWidth( 300 );  // Opmerkingen
         titelTable.getColumnModel( ).getColumn( 7 ).setPreferredWidth( 300 );  // Boek
 
-        final DefaultCellEditor onderwerpDefaultCellEditor =
-                new DefaultCellEditor( new OnderwerpComboBox( connection ) );
+        final DefaultCellEditor auteursDefaultCellEditor = new DefaultCellEditor( new AuteursComboBox( connection, parentFrame, false ) );
+        titelTable.getColumnModel( ).getColumn( 1 ).setCellEditor( auteursDefaultCellEditor );
+
+        final DefaultCellEditor onderwerpDefaultCellEditor = new DefaultCellEditor( new OnderwerpComboBox( connection ) );
         titelTable.getColumnModel( ).getColumn( 3 ).setCellEditor( onderwerpDefaultCellEditor );
 
-        final DefaultCellEditor vormDefaultCellEditor =
-                new DefaultCellEditor( new VormComboBox( connection ) );
+        final DefaultCellEditor vormDefaultCellEditor = new DefaultCellEditor( new VormComboBox( connection ) );
         titelTable.getColumnModel( ).getColumn( 4 ).setCellEditor( vormDefaultCellEditor );
 
-        final DefaultCellEditor taalDefaultCellEditor =
-                new DefaultCellEditor( new TaalComboBox( connection ) );
+        final DefaultCellEditor taalDefaultCellEditor = new DefaultCellEditor( new TaalComboBox( connection ) );
         titelTable.getColumnModel( ).getColumn( 5 ).setCellEditor( taalDefaultCellEditor );
 
         // Set vertical size just enough for 20 entries
@@ -359,21 +357,20 @@ public class TitelFrame {
                     if ( selectedRow == -1 ) {
                         logger.severe( "Invalid selected row" );
                     } else {
-                        int result =
-                                JOptionPane.showConfirmDialog( frame,
-                                        "Data zijn gewijzigd: modificaties opslaan?",
-                                        "Record is gewijzigd",
-                                        JOptionPane.YES_NO_OPTION,
+                        int result = JOptionPane.showConfirmDialog(thisFrame,
+                                                                   "Data zijn gewijzigd: modificaties opslaan?",
+                                                                   "Record is gewijzigd",
+                                                                   JOptionPane.YES_NO_OPTION,
                                         JOptionPane.QUESTION_MESSAGE,
                                         null );
 
                         if ( result == JOptionPane.YES_OPTION ) {
                             // Save the changes in the table model, and in the database
                             if ( !( titelTableModel.saveEditRow( selectedRow ) ) ) {
-                                JOptionPane.showMessageDialog( frame,
-                                        "Error: row not saved",
-                                        "Save titel record error",
-                                        JOptionPane.ERROR_MESSAGE );
+                                JOptionPane.showMessageDialog(thisFrame,
+                                                              "Error: row not saved",
+                                                              "Save titel record error",
+                                                              JOptionPane.ERROR_MESSAGE );
                                 return;
                             }
                         } else {
@@ -434,12 +431,12 @@ public class TitelFrame {
         class ButtonActionListener implements ActionListener {
             public void actionPerformed( ActionEvent actionEvent ) {
                 if ( actionEvent.getActionCommand( ).equals( "close" ) ) {
-                    frame.setVisible( false );
-                    frame.dispose();
+                    setVisible( false );
+                    dispose();
                     return;
                 } else if ( actionEvent.getActionCommand( ).equals( "insert" ) ) {
                     // Insert new titel record
-                    new EditTitelDialog( connection, frame,
+                    new EditTitelDialog( connection, parentFrame,
                                          titelFilterTextField.getText( ),
                                          boekFilterTextField.getText( ),
                                          selectedAuteursId,
@@ -459,10 +456,10 @@ public class TitelFrame {
                 } else {
                     int selectedRow = titelListSelectionListener.getSelectedRow( );
                     if ( selectedRow < 0 ) {
-                        JOptionPane.showMessageDialog( frame,
-                                "Geen titel geselecteerd",
-                                "titel frame error",
-                                JOptionPane.ERROR_MESSAGE );
+                        JOptionPane.showMessageDialog( thisFrame,
+                                                       "Geen titel geselecteerd",
+                                                       "Edit titel error",
+                                                       JOptionPane.ERROR_MESSAGE );
                         return;
                     }
 
@@ -471,16 +468,16 @@ public class TitelFrame {
 
                     // Check if titel has been selected
                     if ( selectedTitelKey == new TitelKey( ) ) {
-                        JOptionPane.showMessageDialog( frame,
-                                "Geen titel geselecteerd",
-                                "titel frame error",
+                        JOptionPane.showMessageDialog( thisFrame,
+                                                       "Geen titel geselecteerd",
+                                                       "Edit titel error",
                                 JOptionPane.ERROR_MESSAGE );
                         return;
                     }
 
                     if ( actionEvent.getActionCommand( ).equals( "openDialog" ) ) {
                         // Open dialog
-                        new EditTitelDialog( connection, frame, selectedTitelKey );
+                        new EditTitelDialog( connection, parentFrame, selectedTitelKey );
 
                         // Records may have been modified: setup the table model again
                         titelTableSorter.clearSortingState( );
@@ -497,13 +494,12 @@ public class TitelFrame {
                         if ( ( titelString == null ) || ( titelString.length( ) == 0 ) ) {
                             titelString = " ";
                         }
-                        int result =
-                                JOptionPane.showConfirmDialog( frame,
-                                        "Delete '" + titelString + "' ?",
-                                        "Delete Boek record",
-                                        JOptionPane.YES_NO_OPTION,
-                                        JOptionPane.QUESTION_MESSAGE,
-                                        null );
+                        int result = JOptionPane.showConfirmDialog( thisFrame,
+                                                                    "Delete '" + titelString + "' ?",
+                                                                    "Delete Boek record",
+                                                                    JOptionPane.YES_NO_OPTION,
+                                                                    JOptionPane.QUESTION_MESSAGE,
+                                                               null );
 
                         if ( result != JOptionPane.YES_OPTION ) return;
 
@@ -527,16 +523,19 @@ public class TitelFrame {
                             Statement statement = connection.createStatement( );
                             int nUpdate = statement.executeUpdate( deleteString );
                             if ( nUpdate != 1 ) {
-                                String errorString = ( "Could not delete record with titel '" +
-                                        selectedTitelKey.getTitelString( ) + "' in titel" );
-                                JOptionPane.showMessageDialog( frame,
-                                        errorString,
-                                        "Delete titel record",
-                                        JOptionPane.ERROR_MESSAGE );
+                                final String errorString = "Could not delete record with titel '" + selectedTitelKey.getTitelString( ) + "' in titel";
+                                JOptionPane.showMessageDialog( thisFrame,
+                                                               errorString,
+                                                               "Delete titel record",
+                                                               JOptionPane.ERROR_MESSAGE );
                                 logger.severe( errorString );
                                 return;
                             }
                         } catch ( SQLException sqlException ) {
+                            JOptionPane.showMessageDialog( thisFrame,
+                                                           "SQL exception in delete: " + sqlException.getMessage(),
+                                                           "EditTitel SQL exception",
+                                                           JOptionPane.ERROR_MESSAGE );
                             logger.severe( "SQLException: " + sqlException.getMessage( ) );
                             return;
                         }
@@ -572,10 +571,10 @@ public class TitelFrame {
                     } else if ( actionEvent.getActionCommand( ).equals( "save" ) ) {
                         // Save the changes in the table model, and in the database
                         if ( !( titelTableModel.saveEditRow( selectedRow ) ) ) {
-                            JOptionPane.showMessageDialog( frame,
-                                    "Error: row not saved",
-                                    "Save titel record error",
-                                    JOptionPane.ERROR_MESSAGE );
+                            JOptionPane.showMessageDialog( thisFrame,
+                                                           "Error: row not saved",
+                                                           "Edit titel error",
+                                                           JOptionPane.ERROR_MESSAGE );
                             return;
                         }
 
@@ -639,21 +638,9 @@ public class TitelFrame {
         constraints.fill = GridBagConstraints.NONE;
         container.add( buttonPanel, constraints );
 
-        // Add a window listener to close the connection when the frame is disposed
-        frame.addWindowListener( new WindowAdapter() {
-            @Override
-            public void windowClosed(WindowEvent e) {
-                try {
-                    // Close the connection to the MySQL database
-                    connection.close( );
-                } catch (SQLException sqlException) {
-                    logger.severe( "SQL exception closing connection: " + sqlException.getMessage() );
-                }
-            }
-        } );
-
-        frame.setSize( 1420, 720 );
-        frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-        frame.setVisible( true );
+        setSize( 1420, 720 );
+        setLocation(x, y);
+        setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+        setVisible( true );
     }
 }

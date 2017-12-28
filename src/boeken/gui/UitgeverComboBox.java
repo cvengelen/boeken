@@ -2,6 +2,7 @@
 
 package boeken.gui;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -16,10 +17,7 @@ public class UitgeverComboBox extends JComboBox< String > {
     final Logger logger = Logger.getLogger( "boeken.gui.UitgeverComboBox" );
 
     private Connection connection;
-
-    // The parent can be either a JFrame or a JDialog:
-    // No common ancestor other than Object, so store as Object
-    private Object parentObject;
+    private Component  parentComponent;
 
     private int selectedUitgeverId = 0;
     private String uitgeverFilterString = null;
@@ -44,22 +42,21 @@ public class UitgeverComboBox extends JComboBox< String > {
     private Map< String, UitgeverData > uitgeverMap = new HashMap< String, UitgeverData >( );
 
     public UitgeverComboBox( Connection connection,
-                             Object parentObject,
+                             Component parentComponent,
                              boolean allowNewUitgever ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
         this.allowNewUitgever = allowNewUitgever;
 
         // Setup the uitgever combo box
         setupUitgeverComboBox( );
     }
 
-
     public UitgeverComboBox( Connection connection,
-                             Object parentObject,
+                             Component parentComponent,
                              int defaultUitgeverId ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
         selectedUitgeverId = defaultUitgeverId;
 
         // Setup the uitgever combo box
@@ -164,34 +161,22 @@ public class UitgeverComboBox extends JComboBox< String > {
         String newUitgeverFilterString = null;
 
         // Prompt for the uitgever filter, using the current value as default
-        if ( parentObject instanceof JFrame ) {
-            newUitgeverFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JFrame ) parentObject,
-                            "Uitgever filter:",
-                            "Uitgever filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            uitgeverFilterString );
-        } else if ( parentObject instanceof JDialog ) {
-            newUitgeverFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JDialog ) parentObject,
-                            "Uitgever filter:",
-                            "Uitgever filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            uitgeverFilterString );
-        }
+        newUitgeverFilterString = (String)JOptionPane.showInputDialog(parentComponent,
+                                                                      "Uitgever filter:",
+                                                                      "Uitgever filter dialog",
+                                                                      JOptionPane.QUESTION_MESSAGE,
+                                                                      null,
+                                                                      null,
+                                                                      uitgeverFilterString);
 
         // Check if dialog was completed successfully (i.e., not canceled)
-        if ( newUitgeverFilterString != null ) {
+        if (newUitgeverFilterString != null) {
             // Store the new uitgever filter
             uitgeverFilterString = newUitgeverFilterString;
 
             // Setup the uitgever combo box with the uitgever filter
             // Reset the selected uitgever ID in order to avoid immediate selection
-            setupUitgeverComboBox( 0 );
+            setupUitgeverComboBox(0);
         }
 
         // Return current uitgever filter string, also when dialog has been canceled

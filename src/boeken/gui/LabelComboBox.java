@@ -2,6 +2,7 @@
 
 package boeken.gui;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -16,10 +17,7 @@ public class LabelComboBox extends JComboBox< String > {
     final Logger logger = Logger.getLogger( "boeken.gui.LabelComboBox" );
 
     private Connection connection;
-
-    // The parent can be either a JFrame or a JDialog:
-    // No common ancestor other than Object, so store as Object
-    private Object parentObject;
+    private Component  parentComponent;
 
     private Map< String, Integer > labelMap = new HashMap< String, Integer >( );
     private int selectedLabelId = 0;
@@ -30,10 +28,10 @@ public class LabelComboBox extends JComboBox< String > {
 
 
     public LabelComboBox( Connection connection,
-                          Object parentObject,
+                          Component parentComponent,
                           boolean allowNewLabel ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
         this.allowNewLabel = allowNewLabel;
 
         // Setup the label combo box
@@ -42,10 +40,10 @@ public class LabelComboBox extends JComboBox< String > {
 
 
     public LabelComboBox( Connection connection,
-                          Object parentObject,
+                          Component parentComponent,
                           int selectedLabelId ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
         this.selectedLabelId = selectedLabelId;
 
         // Setup the label combo box
@@ -126,34 +124,22 @@ public class LabelComboBox extends JComboBox< String > {
         String newLabelFilterString = null;
 
         // Prompt for the label filter, using the current value as default
-        if ( parentObject instanceof JFrame ) {
-            newLabelFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JFrame ) parentObject,
-                            "Label filter:",
-                            "Label filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            labelFilterString );
-        } else if ( parentObject instanceof JDialog ) {
-            newLabelFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JDialog ) parentObject,
-                            "Label filter:",
-                            "Label filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            labelFilterString );
-        }
+        newLabelFilterString = (String)JOptionPane.showInputDialog(parentComponent,
+                                                                   "Label filter:",
+                                                                   "Label filter dialog",
+                                                                   JOptionPane.QUESTION_MESSAGE,
+                                                                   null,
+                                                                   null,
+                                                                   labelFilterString);
 
         // Check if dialog was completed successfully (i.e., not canceled)
-        if ( newLabelFilterString != null ) {
+        if (newLabelFilterString != null) {
             // Store the new label filter
             labelFilterString = newLabelFilterString;
 
             // Setup the label combo box with the label filter
             // Reset the selected label ID in order to avoid immediate selection
-            setupLabelComboBox( 0 );
+            setupLabelComboBox(0);
         }
 
         // Return current label filter string, also when dialog has been canceled

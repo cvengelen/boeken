@@ -2,6 +2,7 @@
 
 package boeken.gui;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -16,10 +17,7 @@ public class PersoonComboBox extends JComboBox< String > {
     final Logger logger = Logger.getLogger( "boeken.gui.PersoonComboBox" );
 
     private Connection connection;
-
-    // The parent can be either a JFrame or a JDialog:
-    // No common ancestor other than Object, so store as Object
-    private Object parentObject;
+    private Component  parentComponent;
 
     private Map< String, Integer > persoonMap = new HashMap< String, Integer >( );
     private int selectedPersoonId = 0;
@@ -28,9 +26,9 @@ public class PersoonComboBox extends JComboBox< String > {
 
 
     public PersoonComboBox( Connection connection,
-                            Object parentObject ) {
+                            Component parentComponent ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
 
         // Setup the persoon combo box
         setupPersoonComboBox( );
@@ -38,10 +36,10 @@ public class PersoonComboBox extends JComboBox< String > {
 
 
     public PersoonComboBox( Connection connection,
-                            Object parentObject,
+                            Component parentComponent,
                             int selectedPersoonId ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
         this.selectedPersoonId = selectedPersoonId;
 
         // Setup the persoon combo box
@@ -120,34 +118,22 @@ public class PersoonComboBox extends JComboBox< String > {
         String newPersoonFilterString = null;
 
         // Prompt for the persoon filter, using the current value as default
-        if ( parentObject instanceof JFrame ) {
-            newPersoonFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JFrame ) parentObject,
-                            "Persoon filter:",
-                            "Persoon filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            persoonFilterString );
-        } else if ( parentObject instanceof JDialog ) {
-            newPersoonFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JDialog ) parentObject,
-                            "Persoon filter:",
-                            "Persoon filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            persoonFilterString );
-        }
+        newPersoonFilterString = (String)JOptionPane.showInputDialog(parentComponent,
+                                                                     "Persoon filter:",
+                                                                     "Persoon filter dialog",
+                                                                     JOptionPane.QUESTION_MESSAGE,
+                                                                     null,
+                                                                     null,
+                                                                     persoonFilterString);
 
         // Check if dialog was completed successfully (i.e., not canceled)
-        if ( newPersoonFilterString != null ) {
+        if (newPersoonFilterString != null) {
             // Store the new persoon filter
             persoonFilterString = newPersoonFilterString;
 
             // Setup the persoon combo box with the persoon filter
             // Reset the selected persoon ID in order to avoid immediate selection
-            setupPersoonComboBox( 0 );
+            setupPersoonComboBox(0);
         }
 
         // Return current persoon filter string, also when dialog has been canceled

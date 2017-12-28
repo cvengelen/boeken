@@ -17,12 +17,9 @@ import table.*;
 
 /**
  * Frame to show, insert and update records in the boek table in schema boeken.
- * An instance of BoekFrame is created by class boeken.Main.
  */
-public class BoekFrame {
-    private final Logger logger = Logger.getLogger( BoekFrame.class.getCanonicalName() );
-
-    private final JFrame frame = new JFrame( "Boek");
+public class EditBoek extends JInternalFrame {
+    private final Logger logger = Logger.getLogger( EditBoek.class.getCanonicalName() );
 
     private JTextField boekFilterTextField;
 
@@ -39,10 +36,13 @@ public class BoekFrame {
     private TableSorter boekTableSorter;
 
 
-    public BoekFrame( final Connection connection ) {
+    public EditBoek( final Connection connection, final JFrame parentFrame, int x, int y ) {
+        super("Edit boek", true, true, true, true);
 
-	// put the controls the content pane
-	Container container = frame.getContentPane();
+        JInternalFrame thisFrame = this;
+
+        // Get the container from the internal frame
+        final Container container = getContentPane();
 
 	// Set grid bag layout manager
 	container.setLayout( new GridBagLayout( ) );
@@ -119,7 +119,7 @@ public class BoekFrame {
 	container.add( new JLabel( "Uitgever:" ), constraints );
 
 	// Setup a JComboBox with the results of the query on uitgever
-	uitgeverComboBox = new UitgeverComboBox( connection, frame, false );
+	uitgeverComboBox = new UitgeverComboBox( connection, thisFrame, false );
         constraints.insets = new Insets( 5, 5, 5, 20 );
 	constraints.gridx = GridBagConstraints.RELATIVE;
         constraints.anchor = GridBagConstraints.WEST;
@@ -177,9 +177,7 @@ public class BoekFrame {
 	final JButton deleteBoekButton = new JButton( "Delete" );
 
 	// Create boek table from boek table model
-	boekTableModel = new BoekTableModel( connection,
-					     cancelBoekButton,
-					     saveBoekButton );
+	boekTableModel = new BoekTableModel( connection, thisFrame, cancelBoekButton, saveBoekButton );
 	boekTableSorter = new TableSorter( boekTableModel );
 	final JTable boekTable = new JTable( boekTableSorter );
 	boekTableSorter.setTableHeader( boekTable.getTableHeader( ) );
@@ -198,20 +196,16 @@ public class BoekFrame {
 	boekTable.getColumnModel( ).getColumn( 8 ).setPreferredWidth( 100 );  // aanschaf datum
 	boekTable.getColumnModel( ).getColumn( 9 ).setPreferredWidth( 100 );  // verwijderd datum
 
-	final DefaultCellEditor typeDefaultCellEditor =
-	    new DefaultCellEditor( new TypeComboBox( connection ) );
+	final DefaultCellEditor typeDefaultCellEditor = new DefaultCellEditor( new TypeComboBox( connection ) );
 	boekTable.getColumnModel( ).getColumn( 2 ).setCellEditor( typeDefaultCellEditor );
 
-	final DefaultCellEditor uitgeverDefaultCellEditor =
-	    new DefaultCellEditor( new UitgeverComboBox( connection, frame, false ) );
+	final DefaultCellEditor uitgeverDefaultCellEditor = new DefaultCellEditor( new UitgeverComboBox( connection, thisFrame, false ) );
 	boekTable.getColumnModel( ).getColumn( 3 ).setCellEditor( uitgeverDefaultCellEditor );
 
-	final DefaultCellEditor statusDefaultCellEditor =
-	    new DefaultCellEditor( new StatusComboBox( connection ) );
+	final DefaultCellEditor statusDefaultCellEditor = new DefaultCellEditor( new StatusComboBox( connection ) );
 	boekTable.getColumnModel( ).getColumn( 6 ).setCellEditor( statusDefaultCellEditor );
 
-	final DefaultCellEditor labelDefaultCellEditor =
-	    new DefaultCellEditor( new LabelComboBox( connection, frame, false ) );
+	final DefaultCellEditor labelDefaultCellEditor = new DefaultCellEditor( new LabelComboBox( connection, thisFrame, false ) );
 	boekTable.getColumnModel( ).getColumn( 7 ).setCellEditor( labelDefaultCellEditor );
 
 	// Set vertical size just enough for 20 entries
@@ -245,7 +239,7 @@ public class BoekFrame {
 			logger.severe( "Invalid selected row" );
 		    } else {
 			int result =
-			    JOptionPane.showConfirmDialog( frame,
+			    JOptionPane.showConfirmDialog( thisFrame,
 							   "Data zijn gewijzigd: modificaties opslaan?",
 							   "Record is gewijzigd",
 							   JOptionPane.YES_NO_OPTION,
@@ -255,7 +249,7 @@ public class BoekFrame {
 			if ( result == JOptionPane.YES_OPTION ) {
 			    // Save the changes in the table model, and in the database
 			    if ( !( boekTableModel.saveEditRow( selectedRow ) ) ) {
-				JOptionPane.showMessageDialog( frame,
+				JOptionPane.showMessageDialog( thisFrame,
 							       "Error: row not saved",
 							       "Save boek record error",
 							       JOptionPane.ERROR_MESSAGE );
@@ -312,12 +306,12 @@ public class BoekFrame {
 	class ButtonActionListener implements ActionListener {
 	    public void actionPerformed( ActionEvent actionEvent ) {
 		if ( actionEvent.getActionCommand( ).equals( "close" ) ) {
-		    frame.setVisible( false );
-		    frame.dispose( );
+		    setVisible( false );
+		    dispose( );
 		    return;
 		} else if ( actionEvent.getActionCommand( ).equals( "insert" ) ) {
 		    // Insert new boek record
-		    new EditBoekDialog( connection, frame,
+		    new EditBoekDialog( connection, parentFrame,
                                         boekFilterTextField.getText( ),
                                         selectedTypeId,
                                         selectedUitgeverId,
@@ -332,9 +326,9 @@ public class BoekFrame {
 		} else {
 		    int selectedRow = boekListSelectionListener.getSelectedRow( );
 		    if ( selectedRow < 0 ) {
-			JOptionPane.showMessageDialog( frame,
+			JOptionPane.showMessageDialog( thisFrame,
 						       "Geen boek geselecteerd",
-						       "Boek frame error",
+						       "Edit boek error",
 						       JOptionPane.ERROR_MESSAGE );
 			return;
 		    }
@@ -344,16 +338,16 @@ public class BoekFrame {
 
 		    // Check if boek has been selected
 		    if ( selectedBoekId == 0 ) {
-			JOptionPane.showMessageDialog( frame,
+			JOptionPane.showMessageDialog( thisFrame,
 						       "Geen boek geselecteerd",
-						       "Boek frame error",
+						       "Edit boek error",
 						       JOptionPane.ERROR_MESSAGE );
 			return;
 		    }
 
 		    if ( actionEvent.getActionCommand( ).equals( "openDialog" ) ) {
 			// Do dialog
-			new EditBoekDialog( connection, frame, selectedBoekId );
+			new EditBoekDialog( connection, parentFrame, selectedBoekId );
 
 			// Records may have been modified: setup the table model again
 			boekTableSorter.clearSortingState( );
@@ -376,20 +370,24 @@ public class BoekFrame {
 				statement.executeQuery( "SELECT boek_id FROM titel WHERE boek_id = " +
 							selectedBoekId );
 			    if ( resultSet.next( ) ) {
-				JOptionPane.showMessageDialog( frame,
+				JOptionPane.showMessageDialog( thisFrame,
 							       "Tabel titel heeft nog verwijzing naar '" +
 							       selectedBoekString + "'",
-							       "Boek frame error",
+							       "Edit boek error",
 							       JOptionPane.ERROR_MESSAGE );
 				return;
 			    }
 			} catch ( SQLException sqlException ) {
+                            JOptionPane.showMessageDialog( thisFrame,
+                                                           "SQL exception in select: " + sqlException.getMessage(),
+                                                           "EditBoekSQL exception",
+                                                           JOptionPane.ERROR_MESSAGE );
 			    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 			    return;
 			}
 
 			int result =
-			    JOptionPane.showConfirmDialog( frame,
+			    JOptionPane.showConfirmDialog( thisFrame,
 							   "Delete '" + selectedBoekString + "' ?",
 							   "Delete Boek record",
 							   JOptionPane.YES_NO_OPTION,
@@ -407,16 +405,19 @@ public class BoekFrame {
 			    Statement statement = connection.createStatement( );
 			    int nUpdate = statement.executeUpdate( deleteString );
 			    if ( nUpdate != 1 ) {
-				String errorString = ( "Could not delete record with boek_id  = " +
-						       selectedBoekId + " in boek" );
-				JOptionPane.showMessageDialog( frame,
+				final String errorString = "Could not delete record with boek_id  = " + selectedBoekId + " in boek";
+				JOptionPane.showMessageDialog( thisFrame,
 							       errorString,
-							       "Delete boek record",
+							       "Edit boek rerror",
 							       JOptionPane.ERROR_MESSAGE);
 				logger.severe( errorString );
 				return;
 			    }
 			} catch ( SQLException sqlException ) {
+                            JOptionPane.showMessageDialog( thisFrame,
+                                                           "SQL exception in delete: " + sqlException.getMessage(),
+                                                           "EditBoekSQL exception",
+                                                           JOptionPane.ERROR_MESSAGE );
 			    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 			    return;
 			}
@@ -449,7 +450,7 @@ public class BoekFrame {
 		    } else if ( actionEvent.getActionCommand( ).equals( "save" ) ) {
 			// Save the changes in the table model, and in the database
 			if ( !( boekTableModel.saveEditRow( selectedRow ) ) ) {
-			    JOptionPane.showMessageDialog( frame,
+			    JOptionPane.showMessageDialog( thisFrame,
 							   "Error: row not saved",
 							   "Save boek record error",
 							   JOptionPane.ERROR_MESSAGE );
@@ -516,21 +517,9 @@ public class BoekFrame {
         constraints.fill = GridBagConstraints.NONE;
 	container.add( buttonPanel, constraints );
 
-        // Add window listener to close the connection when the frame is disposed
-        frame.addWindowListener( new WindowAdapter() {
-            @Override
-            public void windowClosed(WindowEvent e) {
-                try {
-                    // Close the connection to the MySQL database
-                    connection.close( );
-                } catch (SQLException sqlException) {
-                    logger.severe( "SQL exception closing connection: " + sqlException.getMessage() );
-                }
-            }
-        } );
-
-	frame.setSize( 1080, 600 );
-        frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-	frame.setVisible(true);
+	setSize( 1140, 700 );
+	setLocation(x, y);
+        setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+	setVisible(true);
     }
 }

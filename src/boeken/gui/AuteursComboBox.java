@@ -2,6 +2,7 @@
 
 package boeken.gui;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -16,10 +17,7 @@ public class AuteursComboBox extends JComboBox< String > {
     final Logger logger = Logger.getLogger( AuteursComboBox.class.getCanonicalName( ) );
 
     private Connection connection;
-
-    // The parent can be either a JFrame or a JDialog:
-    // No common ancestor other than Object, so store as Object
-    private Object parentObject;
+    private Component  parentComponent;
 
     private Map< String, Integer > auteursIdMap = new HashMap< >( );
     private int selectedAuteursId = 0;
@@ -33,10 +31,10 @@ public class AuteursComboBox extends JComboBox< String > {
 
 
     public AuteursComboBox( Connection connection,
-                            Object parentObject,
+                            Component  parentComponent,
                             boolean allowNewAuteurs ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
         this.allowNewAuteurs = allowNewAuteurs;
 
         // Setup the auteurs combo box
@@ -45,10 +43,10 @@ public class AuteursComboBox extends JComboBox< String > {
 
 
     public AuteursComboBox( Connection connection,
-                            Object parentObject,
+                            Component  parentComponent,
                             int selectedAuteursId ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
         this.selectedAuteursId = selectedAuteursId;
 
         // Setup the auteurs combo box
@@ -140,25 +138,13 @@ public class AuteursComboBox extends JComboBox< String > {
         String newAuteursFilterString = null;
 
         // Prompt for the auteurs filter, using the current value as default
-        if ( parentObject instanceof JFrame ) {
-            newAuteursFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JFrame ) parentObject,
-                            "Auteurs filter:",
-                            "Auteurs filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            auteursFilterString );
-        } else if ( parentObject instanceof JDialog ) {
-            newAuteursFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JDialog ) parentObject,
-                            "Auteurs filter:",
-                            "Auteurs filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            auteursFilterString );
-        }
+        newAuteursFilterString = (String)JOptionPane.showInputDialog(parentComponent,
+                                                                     "Auteurs filter:",
+                                                                     "Auteurs filter dialog",
+                                                                     JOptionPane.QUESTION_MESSAGE,
+                                                                     null,
+                                                                     null,
+                                                                     auteursFilterString);
 
         // Check if dialog was completed successfully (i.e., not canceled)
         if ( newAuteursFilterString != null ) {
@@ -212,5 +198,20 @@ public class AuteursComboBox extends JComboBox< String > {
         if ( auteursString == null ) return false;
 
         return auteursString.equals( newAuteursString );
+    }
+
+
+    public int getAuteursId( String auteursString ) {
+        if ( auteursString == null ) return 0;
+
+        // Check if empty string is selected
+        if ( auteursString.length( ) == 0 ) return 0;
+
+        // Get the auteurs_id from the map
+        if ( auteursMap.containsKey( auteursString ) ) {
+            return auteursIdMap.get( auteursString );
+        }
+
+        return 0;
     }
 }

@@ -7,6 +7,7 @@ import boeken.gui.StatusComboBox;
 import boeken.gui.TypeComboBox;
 import boeken.gui.UitgeverComboBox;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -23,7 +24,9 @@ import java.util.regex.*;
 class BoekTableModel extends AbstractTableModel {
     private final Logger logger = Logger.getLogger( "boeken.boek.BoekTableModel" );
 
-    private Connection connection;
+    private final Connection connection;
+    private final Component  parentComponent;
+
     private final String[ ] headings = { "Id", "Boek", "Type",
                                          "Uitgever", "ISBN-3", "ISBN-4",
                                          "Status", "Label", "Aanschafdatum", "Verwijderd" };
@@ -117,17 +120,19 @@ class BoekTableModel extends AbstractTableModel {
 
     // Constructor
     BoekTableModel( final Connection connection,
+                    final Component  parentComponent,
                     final JButton    cancelBoekButton,
                     final JButton    saveBoekButton ) {
 	this.connection = connection;
+	this.parentComponent = parentComponent;
 	this.cancelBoekButton = cancelBoekButton;
 	this.saveBoekButton = saveBoekButton;
 
 	// Create the combo boxes
 	typeComboBox = new TypeComboBox( connection );
-	uitgeverComboBox = new UitgeverComboBox( connection, null, false );
+	uitgeverComboBox = new UitgeverComboBox( connection, parentComponent, false );
 	statusComboBox = new StatusComboBox( connection );
-	labelComboBox = new LabelComboBox( connection, null, false );
+	labelComboBox = new LabelComboBox( connection, parentComponent, false );
 
 	setupBoekTableModel( null, 0, 0, 0 );
     }
@@ -254,8 +259,12 @@ class BoekTableModel extends AbstractTableModel {
 	    // Trigger update of table data
 	    fireTableDataChanged( );
 	} catch ( SQLException sqlException ) {
-	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
-	}
+            JOptionPane.showMessageDialog(parentComponent,
+                                          "SQL exception in select: " + sqlException.getMessage(),
+                                          "BoekTableModel exception",
+                                          JOptionPane.ERROR_MESSAGE);
+            logger.severe("SQLException: " + sqlException.getMessage());
+        }
     }
 
     public int getRowCount( ) { return boekRecordList.size( ); }
@@ -652,9 +661,13 @@ class BoekTableModel extends AbstractTableModel {
 		return false;
 	    }
 	} catch ( SQLException sqlException ) {
-	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
-	    return false;
-	}
+            JOptionPane.showMessageDialog(parentComponent,
+                                          "SQL exception in update: " + sqlException.getMessage(),
+                                          "BoekTableModel exception",
+                                          JOptionPane.ERROR_MESSAGE);
+            logger.severe("SQLException: " + sqlException.getMessage());
+            return false;
+        }
 
 	// Store record in list
 	// logger.info( "storing record at row " + row );

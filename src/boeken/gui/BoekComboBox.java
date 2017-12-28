@@ -2,6 +2,7 @@
 
 package boeken.gui;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -15,10 +16,7 @@ public class BoekComboBox extends JComboBox< String > {
     final private Logger logger = Logger.getLogger( "boeken.gui.BoekComboBox" );
 
     private Connection connection;
-
-    // The parent can be either a JFrame or a JDialog:
-    // No common ancestor other than Object, so store as Object
-    private Object parentObject;
+    private Component  parentComponent;
 
     private Map< String, Integer > boekMap = new HashMap< String, Integer >( );
     private int selectedBoekId = 0;
@@ -27,10 +25,10 @@ public class BoekComboBox extends JComboBox< String > {
 
 
     public BoekComboBox( Connection connection,
-                         Object parentObject,
+                         Component parentComponent,
                          String boekFilterString ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
         this.boekFilterString = boekFilterString;
 
         // Setup the boek combo box
@@ -39,10 +37,10 @@ public class BoekComboBox extends JComboBox< String > {
 
 
     public BoekComboBox( Connection connection,
-                         Object parentObject,
+                         Component parentComponent,
                          int selectedBoekId ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
 
         // Setup the boek combo box
         setupBoekComboBox( selectedBoekId );
@@ -131,34 +129,22 @@ public class BoekComboBox extends JComboBox< String > {
         String newBoekFilterString = null;
 
         // Prompt for the boek filter, using the current value as default
-        if ( parentObject instanceof JFrame ) {
-            newBoekFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JFrame ) parentObject,
-                            "Boek filter:",
-                            "Boek filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            boekFilterString );
-        } else if ( parentObject instanceof JDialog ) {
-            newBoekFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JDialog ) parentObject,
-                            "Boek filter:",
-                            "Boek filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            boekFilterString );
-        }
+        newBoekFilterString = (String)JOptionPane.showInputDialog(parentComponent,
+                                                                  "Boek filter:",
+                                                                  "Boek filter dialog",
+                                                                  JOptionPane.QUESTION_MESSAGE,
+                                                                  null,
+                                                                  null,
+                                                                  boekFilterString);
 
         // Check if dialog was completed successfully (i.e., not canceled)
-        if ( newBoekFilterString != null ) {
+        if (newBoekFilterString != null) {
             // Store the new boek filter
             boekFilterString = newBoekFilterString;
 
             // Setup the boek combo box with the boek filter
             // Reset the selected boek ID in order to avoid immediate selection
-            setupBoekComboBox( 0 );
+            setupBoekComboBox(0);
         }
 
         // Return current boek filter string, also when dialog has been canceled

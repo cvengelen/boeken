@@ -2,6 +2,7 @@
 
 package boeken.gui;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -16,10 +17,7 @@ public class EditorsComboBox extends JComboBox< String > {
     final Logger logger = Logger.getLogger( "boeken.gui.EditorsComboBox" );
 
     private Connection connection;
-
-    // The parent can be either a JFrame or a JDialog:
-    // No common ancestor other than Object, so store as Object
-    private Object parentObject;
+    private Component  parentComponent;
 
     private Map< String, Integer > editorsMap = new HashMap< String, Integer >( );
     private int selectedEditorsId = 0;
@@ -28,9 +26,9 @@ public class EditorsComboBox extends JComboBox< String > {
 
 
     public EditorsComboBox( Connection connection,
-                            Object parentObject ) {
+                            Component parentComponent ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
 
         // Setup the editors combo box
         setupEditorsComboBox( );
@@ -38,10 +36,10 @@ public class EditorsComboBox extends JComboBox< String > {
 
 
     public EditorsComboBox( Connection connection,
-                            Object parentObject,
+                            Component parentComponent,
                             int defaultEditorsId ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
         this.selectedEditorsId = defaultEditorsId;
 
         // Setup the editors combo box
@@ -128,34 +126,22 @@ public class EditorsComboBox extends JComboBox< String > {
         String newEditorsFilterString = null;
 
         // Prompt for the editors filter, using the current value as default
-        if ( parentObject instanceof JFrame ) {
-            newEditorsFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JFrame ) parentObject,
-                            "Editors filter:",
-                            "Editors filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            editorsFilterString );
-        } else if ( parentObject instanceof JDialog ) {
-            newEditorsFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JDialog ) parentObject,
-                            "Editors filter:",
-                            "Editors filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            editorsFilterString );
-        }
+        newEditorsFilterString = (String)JOptionPane.showInputDialog(parentComponent,
+                                                                     "Editors filter:",
+                                                                     "Editors filter dialog",
+                                                                     JOptionPane.QUESTION_MESSAGE,
+                                                                     null,
+                                                                     null,
+                                                                     editorsFilterString);
 
         // Check if dialog was completed successfully (i.e., not canceled)
-        if ( newEditorsFilterString != null ) {
+        if (newEditorsFilterString != null) {
             // Store the new editors filter
             editorsFilterString = newEditorsFilterString;
 
             // Setup the editors combo box with the editors filter
             // Reset the selected editors ID in order to avoid immediate selection
-            setupEditorsComboBox( 0 );
+            setupEditorsComboBox(0);
         }
 
         // Return current editors filter string, also when dialog has been canceled

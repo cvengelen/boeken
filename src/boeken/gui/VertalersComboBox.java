@@ -2,6 +2,7 @@
 
 package boeken.gui;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -17,10 +18,7 @@ public class VertalersComboBox extends JComboBox< String > {
     final Logger logger = Logger.getLogger( "boeken.gui.VertalersComboBox" );
 
     private Connection connection;
-
-    // The parent can be either a JFrame or a JDialog:
-    // No common ancestor other than Object, so store as Object
-    private Object parentObject;
+    private Component  parentComponent;
 
     private Map< String, Integer > vertalersMap = new HashMap< String, Integer >( );
     int selectedVertalersId = 0;
@@ -29,9 +27,9 @@ public class VertalersComboBox extends JComboBox< String > {
 
 
     public VertalersComboBox( Connection connection,
-                              Object parentObject ) {
+                              Component parentComponent ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
 
         // Setup the vertalers combo box
         setupVertalersComboBox( );
@@ -39,10 +37,10 @@ public class VertalersComboBox extends JComboBox< String > {
 
 
     public VertalersComboBox( Connection connection,
-                              Object parentObject,
+                              Component parentComponent,
                               int defaultVertalersId ) {
         this.connection = connection;
-        this.parentObject = parentObject;
+        this.parentComponent = parentComponent;
         this.selectedVertalersId = defaultVertalersId;
 
         // Setup the vertalers combo box
@@ -134,34 +132,22 @@ public class VertalersComboBox extends JComboBox< String > {
         String newVertalersFilterString = null;
 
         // Prompt for the vertalers filter, using the current value as default
-        if ( parentObject instanceof JFrame ) {
-            newVertalersFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JFrame ) parentObject,
-                            "Vertalers filter:",
-                            "Vertalers filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            vertalersFilterString );
-        } else if ( parentObject instanceof JDialog ) {
-            newVertalersFilterString =
-                    ( String ) JOptionPane.showInputDialog( ( JDialog ) parentObject,
-                            "Vertalers filter:",
-                            "Vertalers filter dialog",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            null,
-                            vertalersFilterString );
-        }
+        newVertalersFilterString = (String)JOptionPane.showInputDialog(parentComponent,
+                                                                       "Vertalers filter:",
+                                                                       "Vertalers filter dialog",
+                                                                       JOptionPane.QUESTION_MESSAGE,
+                                                                       null,
+                                                                       null,
+                                                                       vertalersFilterString);
 
         // Check if dialog was completed successfully (i.e., not canceled)
-        if ( newVertalersFilterString != null ) {
+        if (newVertalersFilterString != null) {
             // Store the new vertalers filter
             vertalersFilterString = newVertalersFilterString;
 
             // Setup the vertalers combo box with the vertalers filter
             // Reset the selected vertalers ID in order to avoid immediate selection
-            setupVertalersComboBox( 0 );
+            setupVertalersComboBox(0);
         }
 
         // Return current vertalers filter string, also when dialog has been canceled

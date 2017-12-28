@@ -16,12 +16,11 @@ import java.awt.event.*;
 import javax.swing.*;
 
 
-public class EditTitelDialog {
+public class EditTitelDialog extends JDialog {
     final private Logger logger = Logger.getLogger( "boeken.gui.EditTitelDialog" );
 
-    Connection connection;
-    private JFrame parentFrame;
-    JDialog dialog;
+    private final Connection connection;
+    private final JFrame parentFrame;
 
     private TitelKey titelKey = new TitelKey( );
 
@@ -81,14 +80,16 @@ public class EditTitelDialog {
 
 
     // Constructor for inserting a record in titel
-    public EditTitelDialog( Connection	connection,
-			    JFrame	parentFrame,
-			    String	defaultTitelString,
-			    String	boekFilterString,
-			    int		defaultAuteursId,
-			    int		defaultOnderwerpId,
-			    int		defaultVormId,
-			    int		defaultTaalId ) {
+    public EditTitelDialog( Connection  connection,
+			    JFrame      parentFrame,
+			    String      defaultTitelString,
+			    String      boekFilterString,
+			    int         defaultAuteursId,
+			    int         defaultOnderwerpId,
+			    int         defaultVormId,
+			    int         defaultTaalId ) {
+        super(parentFrame, "Insert titel", true);
+
 	this.connection = connection;
 	this.parentFrame = parentFrame;
 	this.defaultTitelString = defaultTitelString;
@@ -98,14 +99,16 @@ public class EditTitelDialog {
 	this.defaultVormId = defaultVormId;
 	if ( defaultTaalId != 0 ) this.defaultTaalId = defaultTaalId;
 
-	setupTitelDialog( "Insert titel", "Insert", insertTitelActionCommand );
+	setupTitelDialog("Insert", insertTitelActionCommand );
     }
 
 
     // Constructor for editing an existing record in titel
     public EditTitelDialog( Connection connection,
-			    JFrame     parentFrame,
+                            JFrame     parentFrame,
 			    TitelKey   titelKey ) {
+        super(parentFrame, "Edit titel", true);
+
 	this.connection = connection;
 	this.parentFrame = parentFrame;
 	this.titelKey = titelKey;
@@ -149,19 +152,18 @@ public class EditTitelDialog {
 	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 	}
 
-	setupTitelDialog( "Edit titel", "Update", updateTitelActionCommand );
+	setupTitelDialog("Update", updateTitelActionCommand );
     }
 
 
     // Setup titel dialog
-    private void setupTitelDialog( String dialogTitle,
-                                   String editTitelButtonText,
+    private void setupTitelDialog( String editTitelButtonText,
                                    String editTitelButtonActionCommand ) {
-	// Create modal dialog for editing titel
-	dialog = new JDialog( parentFrame, dialogTitle, true );
+
+        final JDialog thisDialog = this;
 
 	// Set grid bag layout manager
-	Container container = dialog.getContentPane( );
+	Container container = getContentPane( );
 	container.setLayout( new GridBagLayout( ) );
 
 	GridBagConstraints constraints = new GridBagConstraints( );
@@ -185,8 +187,7 @@ public class EditTitelDialog {
 	auteursPersoonTableModel.showTable( defaultAuteursId );
 
 	// Setup a JComboBox with the results of the query on auteurs
-	auteursComboBox = new AuteursComboBox( connection, dialog,
-					       defaultAuteursId );
+	auteursComboBox = new AuteursComboBox( connection, this, defaultAuteursId );
 	constraints.gridx = 0;
 	constraints.gridy = 1;
 	constraints.gridwidth = 1;
@@ -205,7 +206,7 @@ public class EditTitelDialog {
 		if ( auteursComboBox.newAuteursSelected( ) ) {
 		    // Insert new auteurs record
 		    EditAuteursDialog editAuteursDialog =
-			new EditAuteursDialog( connection, dialog, auteursFilterString );
+			new EditAuteursDialog( connection, this, auteursFilterString );
 
 		    // Check if a new auteurs record has been inserted
 		    if ( editAuteursDialog.auteursUpdated( ) ) {
@@ -250,7 +251,7 @@ public class EditTitelDialog {
 
 		// Check if auteurs has been selected
 		if ( selectedAuteursId == 0 ) {
-		    JOptionPane.showMessageDialog( dialog,
+		    JOptionPane.showMessageDialog( thisDialog,
 						   "Geen auteurs geselecteerd",
 						   "Edit titel error",
 						   JOptionPane.ERROR_MESSAGE );
@@ -259,7 +260,7 @@ public class EditTitelDialog {
 
 		// Do dialog
 		EditAuteursDialog editAuteursDialog =
-		    new EditAuteursDialog( connection, dialog, selectedAuteursId );
+		    new EditAuteursDialog( connection, thisDialog, selectedAuteursId );
 
 		if ( editAuteursDialog.auteursUpdated( ) ) {
 		    // Show the selected auteurs
@@ -294,10 +295,10 @@ public class EditTitelDialog {
 
 	if ( editTitelButtonActionCommand.equals( insertTitelActionCommand ) ) {
 	    // Setup a JComboBox with the results of the query on boek with the boek filter string
-	    boekComboBox = new BoekComboBox( connection, dialog, boekFilterString );
+	    boekComboBox = new BoekComboBox( connection, thisDialog, boekFilterString );
 	} else {
 	    // Setup a JComboBox with the results of the query on boek with the selected boek id
-	    boekComboBox = new BoekComboBox( connection, dialog, defaultBoekId );
+	    boekComboBox = new BoekComboBox( connection, thisDialog, defaultBoekId );
 	}
 	constraints.gridx = 0;
 	constraints.gridy = 4;
@@ -321,7 +322,7 @@ public class EditTitelDialog {
                     defaultBoekString.append( titelTextField.getText( ) );
 
 		    EditBoekDialog editBoekDialog =
-			new EditBoekDialog( connection, dialog, defaultBoekString.toString( ) );
+			new EditBoekDialog( connection, thisDialog, defaultBoekString.toString( ) );
 
 		    // Check if a new boek record has been inserted
 		    if ( editBoekDialog.boekUpdated( ) ) {
@@ -361,7 +362,7 @@ public class EditTitelDialog {
 
 		// Check if boek has been selected
 		if ( selectedBoekId == 0 ) {
-		    JOptionPane.showMessageDialog( dialog,
+		    JOptionPane.showMessageDialog( thisDialog,
 						   "Geen boek geselecteerd",
 						   "Edit titel error",
 						   JOptionPane.ERROR_MESSAGE );
@@ -370,7 +371,7 @@ public class EditTitelDialog {
 
 		// Do dialog
 		EditBoekDialog editBoekDialog =
-		    new EditBoekDialog( connection, dialog, selectedBoekId );
+		    new EditBoekDialog( connection, thisDialog, selectedBoekId );
 
 		if ( editBoekDialog.boekUpdated( ) ) {
 		    // Setup the boek combo box again
@@ -480,8 +481,7 @@ public class EditTitelDialog {
 	vertalersPersoonTableModel.showTable( defaultVertalersId );
 
 	// Setup a JComboBox with the results of the query on vertalers
-	vertalersComboBox = new VertalersComboBox( connection, dialog,
-						   defaultVertalersId );
+	vertalersComboBox = new VertalersComboBox( connection, thisDialog, defaultVertalersId );
 	constraints.gridx = 0;
 	constraints.gridy = 14;
 	constraints.gridwidth = 1;
@@ -500,7 +500,7 @@ public class EditTitelDialog {
 		if ( vertalersComboBox.newVertalersSelected( ) ) {
 		    // Insert new vertalers record
 		    EditVertalersDialog editVertalersDialog =
-			new EditVertalersDialog( connection, dialog, vertalersFilterString );
+			new EditVertalersDialog( connection, thisDialog, vertalersFilterString );
 
 		    // Check if a new vertalers record has been inserted
 		    if ( editVertalersDialog.vertalersUpdated( ) ) {
@@ -544,7 +544,7 @@ public class EditTitelDialog {
 
 		// Check if vertalers has been selected
 		if ( selectedVertalersId == 0 ) {
-		    JOptionPane.showMessageDialog( dialog,
+		    JOptionPane.showMessageDialog( thisDialog,
 						   "Geen vertalers geselecteerd",
 						   "Edit titel error",
 						   JOptionPane.ERROR_MESSAGE );
@@ -553,7 +553,7 @@ public class EditTitelDialog {
 
 		// Do dialog
 		EditVertalersDialog editVertalersDialog =
-		    new EditVertalersDialog( connection, dialog, selectedVertalersId );
+		    new EditVertalersDialog( connection, thisDialog, selectedVertalersId );
 
 		if ( editVertalersDialog.vertalersUpdated( ) ) {
 		    // Show the selected vertalers
@@ -594,7 +594,7 @@ public class EditTitelDialog {
 		}
 
 		// Any other actionCommand, including cancel, has no action
-		dialog.setVisible( false );
+                setVisible( false );
 	    }
 	}
 
@@ -614,9 +614,9 @@ public class EditTitelDialog {
 	container.add( buttonPanel, constraints );
 
 
-	dialog.setSize( 970, 700 );
-	dialog.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-	dialog.setVisible( true );
+	setSize( 970, 700 );
+	setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+	setVisible( true );
     }
 
 
@@ -627,7 +627,7 @@ public class EditTitelDialog {
     private boolean insertTitel( ) {
 	String titelString = titelTextField.getText( );
 	if ( titelString == null || titelString.length( ) == 0 ) {
-	    JOptionPane.showMessageDialog( dialog,
+	    JOptionPane.showMessageDialog( this,
 					   "Titel niet ingevuld",
 					   "Insert titel error",
 					   JOptionPane.ERROR_MESSAGE);
@@ -736,7 +736,7 @@ public class EditTitelDialog {
  	// Check if titel changed
 	if ( !titelString.equals( defaultTitelString ) ) {
 	    if ( titelString == null || titelString.length( ) == 0 ) {
-		JOptionPane.showMessageDialog( dialog,
+		JOptionPane.showMessageDialog( this,
 					       "Titel niet ingevuld",
 					       "Insert titel error",
 					       JOptionPane.ERROR_MESSAGE);

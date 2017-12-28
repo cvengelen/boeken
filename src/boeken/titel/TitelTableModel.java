@@ -2,11 +2,13 @@
 
 package boeken.titel;
 
+import boeken.gui.AuteursComboBox;
 import boeken.gui.OnderwerpComboBox;
 import boeken.gui.TaalComboBox;
 import boeken.gui.TitelKey;
 import boeken.gui.VormComboBox;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -22,7 +24,9 @@ import java.util.regex.*;
 class TitelTableModel extends AbstractTableModel {
     private final Logger logger = Logger.getLogger( "boeken.titel.TitelTableModel" );
 
-    private Connection connection;
+    private final Connection connection;
+    private final Component  parentComponent;
+
     private final String[ ] headings = { "Titel", "Auteur", "Jaar copyright", "Onderwerp",
                                          "Vorm", "Taal", "Opmerkingen", "Boek" };
 
@@ -89,6 +93,7 @@ class TitelTableModel extends AbstractTableModel {
 
     private final ArrayList<TitelRecord> titelRecordList = new ArrayList<>( 500 );
 
+    private AuteursComboBox auteursComboBox;
     private OnderwerpComboBox onderwerpComboBox;
     private VormComboBox vormComboBox;
     private TaalComboBox taalComboBox;
@@ -108,13 +113,16 @@ class TitelTableModel extends AbstractTableModel {
 
     // Constructor
     TitelTableModel( final Connection connection,
+                     final Component  parentComponent,
                      final JButton    cancelTitelButton,
                      final JButton    saveTitelButton ) {
 	this.connection = connection;
+	this.parentComponent = parentComponent;
 	this.cancelTitelButton = cancelTitelButton;
 	this.saveTitelButton = saveTitelButton;
 
 	// Create the combo boxes
+        auteursComboBox = new AuteursComboBox(connection, parentComponent, false);
 	onderwerpComboBox = new OnderwerpComboBox( connection );
 	vormComboBox = new VormComboBox( connection );
 	taalComboBox = new TaalComboBox( connection );
@@ -246,8 +254,12 @@ class TitelTableModel extends AbstractTableModel {
 	    // Trigger update of table data
 	    fireTableDataChanged( );
 	} catch ( SQLException sqlException ) {
-	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
-	}
+            JOptionPane.showMessageDialog(parentComponent,
+                                          "SQL exception in select: " + sqlException.getMessage(),
+                                          "TitelTableModel SQL exception",
+                                          JOptionPane.ERROR_MESSAGE);
+            logger.severe("SQLException: " + sqlException.getMessage());
+        }
     }
 
     public int getRowCount( ) { return titelRecordList.size( ); }
@@ -270,7 +282,6 @@ class TitelTableModel extends AbstractTableModel {
 	if ( row != editRow ) return false;
 
 	switch ( column ) {
-	case 1: // auteur
 	case 7: // boek
 	    // Do not allow editing
 	    return false;
@@ -308,76 +319,85 @@ class TitelTableModel extends AbstractTableModel {
 
 	try {
 	    switch ( column ) {
-	    case 0:
-		String titelString = ( String )object;
-		if ( ( ( titelString == null ) || ( titelString.length( ) == 0 ) ) &&
-		     ( titelRecord.titelString != null ) ) {
-		    titelRecord.titelString = null;
-		    rowModified = true;
-		} else if ( ( titelString != null ) &&
-			    ( !titelString.equals( titelRecord.titelString ) ) ) {
-		    titelRecord.titelString = titelString;
-		    rowModified = true;
-		}
-		break;
+                case 0:
+                    String titelString = (String)object;
+                    if (((titelString == null) || (titelString.length() == 0)) &&
+                            (titelRecord.titelString != null)) {
+                        titelRecord.titelString = null;
+                        rowModified = true;
+                    } else if ((titelString != null) &&
+                            (!titelString.equals(titelRecord.titelString))) {
+                        titelRecord.titelString = titelString;
+                        rowModified = true;
+                    }
+                    break;
 
-	    case 2:
-		int copyrightJaar = 0;
-		if ( object != null ) copyrightJaar = ( Integer )object;
-		if ( ( copyrightJaar == 0 ) && ( titelRecord.copyrightJaar != 0 ) ) {
-		    titelRecord.copyrightJaar = 0;
-		    rowModified = true;
-		} else if ( copyrightJaar != titelRecord.copyrightJaar ) {
-		    titelRecord.copyrightJaar = copyrightJaar;
-		    rowModified = true;
-		}
-		break;
+                case 1:
+                    int auteursId = auteursComboBox.getAuteursId((String)object);
+                    if (auteursId != titelRecord.auteursId) {
+                        titelRecord.auteursId = auteursId;
+                        titelRecord.persoonString = (String)object;
+                        rowModified = true;
+                    }
+                    break;
 
-	    case 3:
-		int onderwerpId = onderwerpComboBox.getOnderwerpId( ( String )object );
-		if ( onderwerpId != titelRecord.onderwerpId ) {
-		    titelRecord.onderwerpId = onderwerpId;
-		    titelRecord.onderwerpString = ( String )object;
-		    rowModified = true;
-		}
-		break;
+                case 2:
+                    int copyrightJaar = 0;
+                    if (object != null) copyrightJaar = (Integer)object;
+                    if ((copyrightJaar == 0) && (titelRecord.copyrightJaar != 0)) {
+                        titelRecord.copyrightJaar = 0;
+                        rowModified = true;
+                    } else if (copyrightJaar != titelRecord.copyrightJaar) {
+                        titelRecord.copyrightJaar = copyrightJaar;
+                        rowModified = true;
+                    }
+                    break;
 
-	    case 4:
-		int vormId = vormComboBox.getVormId( ( String )object );
-		if ( vormId != titelRecord.vormId ) {
-		    titelRecord.vormId = vormId;
-		    titelRecord.vormString = ( String )object;
-		    rowModified = true;
-		}
-		break;
+                case 3:
+                    int onderwerpId = onderwerpComboBox.getOnderwerpId((String)object);
+                    if (onderwerpId != titelRecord.onderwerpId) {
+                        titelRecord.onderwerpId = onderwerpId;
+                        titelRecord.onderwerpString = (String)object;
+                        rowModified = true;
+                    }
+                    break;
 
-	    case 5:
-		int taalId = taalComboBox.getTaalId( ( String )object );
-		if ( taalId != titelRecord.taalId ) {
-		    titelRecord.taalId = taalId;
-		    titelRecord.taalString = ( String )object;
-		    rowModified = true;
-		}
-		break;
+                case 4:
+                    int vormId = vormComboBox.getVormId((String)object);
+                    if (vormId != titelRecord.vormId) {
+                        titelRecord.vormId = vormId;
+                        titelRecord.vormString = (String)object;
+                        rowModified = true;
+                    }
+                    break;
 
-	    case 6:
-		String opmerkingenString = ( String )object;
-		if ( ( ( opmerkingenString == null ) || ( opmerkingenString.length( ) == 0 ) ) &&
-		     ( titelRecord.opmerkingenString != null ) ) {
-		    titelRecord.opmerkingenString = null;
-		    rowModified = true;
-		} else if ( ( opmerkingenString != null ) &&
-			    ( !opmerkingenString.equals( titelRecord.opmerkingenString ) ) ) {
-		    titelRecord.opmerkingenString = opmerkingenString;
-		    rowModified = true;
-		}
-		break;
+                case 5:
+                    int taalId = taalComboBox.getTaalId((String)object);
+                    if (taalId != titelRecord.taalId) {
+                        titelRecord.taalId = taalId;
+                        titelRecord.taalString = (String)object;
+                        rowModified = true;
+                    }
+                    break;
 
-	    default:
-		logger.info( "Editing not yet supported for column: " + column );
-		// logger.severe( "Invalid column: " + column );
-		return;
-	    }
+                case 6:
+                    String opmerkingenString = (String)object;
+                    if (((opmerkingenString == null) || (opmerkingenString.length() == 0)) &&
+                            (titelRecord.opmerkingenString != null)) {
+                        titelRecord.opmerkingenString = null;
+                        rowModified = true;
+                    } else if ((opmerkingenString != null) &&
+                            (!opmerkingenString.equals(titelRecord.opmerkingenString))) {
+                        titelRecord.opmerkingenString = opmerkingenString;
+                        rowModified = true;
+                    }
+                    break;
+
+                default:
+                    logger.info("Editing not yet supported for column: " + column);
+                    // logger.severe( "Invalid column: " + column );
+                    return;
+            }
 	} catch ( Exception exception ) {
 	    logger.severe( "could not get value from " +
 			   object + " for column " + column + " in row " + row );
@@ -521,7 +541,12 @@ class TitelTableModel extends AbstractTableModel {
 					      "opmerkingen = '" + quoteMatcher.replaceAll( "\\\\'" ) + "'" );
 	}
 
-	// Check if update is not necessary
+        int auteursId = titelRecord.auteursId;
+        if ( auteursId != originalTitelRecord.auteursId ) {
+            updateString = addToUpdateString(updateString, "auteurs_id = " + auteursId);
+        }
+
+        // Check if update is not necessary
 	if ( updateString == null ) return true;
 
 	updateString = "UPDATE titel SET " + updateString;
@@ -549,9 +574,13 @@ class TitelTableModel extends AbstractTableModel {
 		return false;
 	    }
 	} catch ( SQLException sqlException ) {
-	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
-	    return false;
-	}
+            JOptionPane.showMessageDialog(parentComponent,
+                                          "SQL exception in update: " + sqlException.getMessage(),
+                                          "TitelTableModel SQL exception",
+                                          JOptionPane.ERROR_MESSAGE);
+            logger.severe("SQLException: " + sqlException.getMessage());
+            return false;
+        }
 
 	// Store record in list
 	// logger.info( "storing record at row " + row );
