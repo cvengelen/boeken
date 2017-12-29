@@ -89,20 +89,36 @@ public class Boeken extends JFrame implements ActionListener {
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
 
-        Dimension maximumSize = new Dimension(100, 40);
+        Dimension maximumSize = new Dimension(120, 40);
+
+        // Edit titel
+        JMenuItem menuItem = new JMenuItem("Titel", KeyEvent.VK_T);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.ALT_MASK));
+        menuItem.setActionCommand("editTitel");
+        menuItem.setMaximumSize(maximumSize);
+        menuItem.addActionListener(this);
+        menuBar.add(menuItem);
+
+        // Edit auteurs
+        menuItem = new JMenuItem("Auteurs", KeyEvent.VK_A);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.ALT_MASK));
+        menuItem.setActionCommand("editAuteurs");
+        menuItem.setMaximumSize(maximumSize);
+        menuItem.addActionListener(this);
+        menuBar.add(menuItem);
 
         // Edit boek
-        JMenuItem menuItem = new JMenuItem("Boek", KeyEvent.VK_B);
+        menuItem = new JMenuItem("Boek", KeyEvent.VK_B);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.ALT_MASK));
         menuItem.setActionCommand("editBoek");
         menuItem.setMaximumSize(maximumSize);
         menuItem.addActionListener(this);
         menuBar.add(menuItem);
 
-        // Edit titel
-        menuItem = new JMenuItem("Titel", KeyEvent.VK_T);
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.ALT_MASK));
-        menuItem.setActionCommand("editTitel");
+        // Edit editors
+        menuItem = new JMenuItem("Editors", KeyEvent.VK_E);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.ALT_MASK));
+        menuItem.setActionCommand("editEditors");
         menuItem.setMaximumSize(maximumSize);
         menuItem.addActionListener(this);
         menuBar.add(menuItem);
@@ -114,12 +130,18 @@ public class Boeken extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent actionEvent) {
         JInternalFrame internalFrame = null;
         switch (actionEvent.getActionCommand()) {
-            case "editBoek":
-                internalFrame = new boeken.boek.EditBoek(connection, this, xOffset * openFrameCount, yOffset * openFrameCount);
-                break;
-            case "editTitel":
-                internalFrame = new boeken.titel.EditTitel(connection, this, xOffset * openFrameCount, yOffset * openFrameCount);
-                break;
+        case "editTitel":
+            internalFrame = new boeken.titel.EditTitel(connection, this, xOffset * openFrameCount, yOffset * openFrameCount);
+            break;
+        case "editAuteurs":
+            internalFrame = new boeken.auteurs.EditAuteurs(connection, this, xOffset * openFrameCount, yOffset * openFrameCount);
+            break;
+        case "editBoek":
+            internalFrame = new boeken.boek.EditBoek(connection, this, xOffset * openFrameCount, yOffset * openFrameCount);
+            break;
+        case "editEditors":
+            internalFrame = new boeken.editors.EditEditors(connection, this, xOffset * openFrameCount, yOffset * openFrameCount);
+            break;
         }
 
         if (internalFrame == null) {

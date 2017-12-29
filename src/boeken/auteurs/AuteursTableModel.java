@@ -2,12 +2,14 @@
 
 package boeken.auteurs;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
 
+import javax.swing.*;
 import javax.swing.table.*;
 import java.util.*;
 import java.util.logging.*;
@@ -17,7 +19,9 @@ import java.util.regex.*;
 class AuteursTableModel extends AbstractTableModel {
     private final Logger logger = Logger.getLogger( AuteursTableModel.class.getCanonicalName() );
 
-    private Connection connection;
+    private final Connection connection;
+    private final Component  parentComponent;
+
     private final String[ ] headings = { "Id", "Auteurs", "Persoon" };
 
     private class AuteursRecord {
@@ -45,8 +49,9 @@ class AuteursTableModel extends AbstractTableModel {
 
 
     // Constructor
-    AuteursTableModel( Connection connection ) {
+    AuteursTableModel( Connection connection, final Component  parentComponent) {
 	this.connection = connection;
+	this.parentComponent = parentComponent;
 
 	setupAuteursTableModel( null );
     }
@@ -91,6 +96,10 @@ class AuteursTableModel extends AbstractTableModel {
 	    // Trigger update of table data
 	    fireTableDataChanged( );
 	} catch ( SQLException sqlException ) {
+            JOptionPane.showMessageDialog(parentComponent,
+                                          "SQL exception in select: " + sqlException.getMessage(),
+                                          "AuteursTableModel exception",
+                                          JOptionPane.ERROR_MESSAGE);
 	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 	}
     }
@@ -171,17 +180,15 @@ class AuteursTableModel extends AbstractTableModel {
 		return;
 	    }
 	} catch ( Exception exception ) {
-	    logger.severe( "could not get value from " +
-			   object + " for column " + column + " in row " + row );
+	    logger.severe( "could not get value from " + object + " for column " + column + " in row " + row );
 	    return;
 	}
 
 	// Check if update is not necessary
 	if ( updateString == null ) return;
 
-	updateString = ( "UPDATE auteurs SET " + updateString +
-			 " WHERE auteurs_id = " + auteursRecord.auteursId );
-	logger.info( "updateString: " + updateString );
+	updateString = "UPDATE auteurs SET " + updateString + " WHERE auteurs_id = " + auteursRecord.auteursId;
+	logger.fine( "updateString: " + updateString );
 
 	try {
 	    Statement statement = connection.createStatement( );
@@ -192,6 +199,10 @@ class AuteursTableModel extends AbstractTableModel {
 		return;
 	    }
 	} catch ( SQLException sqlException ) {
+            JOptionPane.showMessageDialog(parentComponent,
+                                          "SQL exception in update: " + sqlException.getMessage(),
+                                          "AuteursTableModel exception",
+                                          JOptionPane.ERROR_MESSAGE);
 	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 	    return;
 	}

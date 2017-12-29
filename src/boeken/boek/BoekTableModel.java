@@ -648,9 +648,8 @@ class BoekTableModel extends AbstractTableModel {
 	// Check if update is not necessary
 	if ( updateString == null ) return true;
 
-	updateString = ( "UPDATE boek SET " + updateString +
-			 " WHERE boek_id = " + originalBoekRecord.boekId );
-	logger.info( "updateString: " + updateString );
+	updateString = "UPDATE boek SET " + updateString + " WHERE boek_id = " + originalBoekRecord.boekId;
+	logger.fine( "updateString: " + updateString );
 
 	try {
 	    Statement statement = connection.createStatement( );

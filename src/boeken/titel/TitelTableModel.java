@@ -319,84 +319,84 @@ class TitelTableModel extends AbstractTableModel {
 
 	try {
 	    switch ( column ) {
-                case 0:
-                    String titelString = (String)object;
-                    if (((titelString == null) || (titelString.length() == 0)) &&
-                            (titelRecord.titelString != null)) {
-                        titelRecord.titelString = null;
-                        rowModified = true;
-                    } else if ((titelString != null) &&
-                            (!titelString.equals(titelRecord.titelString))) {
-                        titelRecord.titelString = titelString;
-                        rowModified = true;
-                    }
-                    break;
+            case 0:
+                String titelString = (String)object;
+                if (((titelString == null) || (titelString.length() == 0)) &&
+                        (titelRecord.titelString != null)) {
+                    titelRecord.titelString = null;
+                    rowModified = true;
+                } else if ((titelString != null) &&
+                        (!titelString.equals(titelRecord.titelString))) {
+                    titelRecord.titelString = titelString;
+                    rowModified = true;
+                }
+                break;
 
-                case 1:
-                    int auteursId = auteursComboBox.getAuteursId((String)object);
-                    if (auteursId != titelRecord.auteursId) {
-                        titelRecord.auteursId = auteursId;
-                        titelRecord.persoonString = (String)object;
-                        rowModified = true;
-                    }
-                    break;
+            case 1:
+                int auteursId = auteursComboBox.getAuteursId((String)object);
+                if (auteursId != titelRecord.auteursId) {
+                    titelRecord.auteursId = auteursId;
+                    titelRecord.persoonString = (String)object;
+                    rowModified = true;
+                }
+                break;
 
-                case 2:
-                    int copyrightJaar = 0;
-                    if (object != null) copyrightJaar = (Integer)object;
-                    if ((copyrightJaar == 0) && (titelRecord.copyrightJaar != 0)) {
-                        titelRecord.copyrightJaar = 0;
-                        rowModified = true;
-                    } else if (copyrightJaar != titelRecord.copyrightJaar) {
-                        titelRecord.copyrightJaar = copyrightJaar;
-                        rowModified = true;
-                    }
-                    break;
+            case 2:
+                int copyrightJaar = 0;
+                if (object != null) copyrightJaar = (Integer)object;
+                if ((copyrightJaar == 0) && (titelRecord.copyrightJaar != 0)) {
+                    titelRecord.copyrightJaar = 0;
+                    rowModified = true;
+                } else if (copyrightJaar != titelRecord.copyrightJaar) {
+                    titelRecord.copyrightJaar = copyrightJaar;
+                    rowModified = true;
+                }
+                break;
 
-                case 3:
-                    int onderwerpId = onderwerpComboBox.getOnderwerpId((String)object);
-                    if (onderwerpId != titelRecord.onderwerpId) {
-                        titelRecord.onderwerpId = onderwerpId;
-                        titelRecord.onderwerpString = (String)object;
-                        rowModified = true;
-                    }
-                    break;
+            case 3:
+                int onderwerpId = onderwerpComboBox.getOnderwerpId((String)object);
+                if (onderwerpId != titelRecord.onderwerpId) {
+                    titelRecord.onderwerpId = onderwerpId;
+                    titelRecord.onderwerpString = (String)object;
+                    rowModified = true;
+                }
+                break;
 
-                case 4:
-                    int vormId = vormComboBox.getVormId((String)object);
-                    if (vormId != titelRecord.vormId) {
-                        titelRecord.vormId = vormId;
-                        titelRecord.vormString = (String)object;
-                        rowModified = true;
-                    }
-                    break;
+            case 4:
+                int vormId = vormComboBox.getVormId((String)object);
+                if (vormId != titelRecord.vormId) {
+                    titelRecord.vormId = vormId;
+                    titelRecord.vormString = (String)object;
+                    rowModified = true;
+                }
+                break;
 
-                case 5:
-                    int taalId = taalComboBox.getTaalId((String)object);
-                    if (taalId != titelRecord.taalId) {
-                        titelRecord.taalId = taalId;
-                        titelRecord.taalString = (String)object;
-                        rowModified = true;
-                    }
-                    break;
+            case 5:
+                int taalId = taalComboBox.getTaalId((String)object);
+                if (taalId != titelRecord.taalId) {
+                    titelRecord.taalId = taalId;
+                    titelRecord.taalString = (String)object;
+                    rowModified = true;
+                }
+                break;
 
-                case 6:
-                    String opmerkingenString = (String)object;
-                    if (((opmerkingenString == null) || (opmerkingenString.length() == 0)) &&
-                            (titelRecord.opmerkingenString != null)) {
-                        titelRecord.opmerkingenString = null;
-                        rowModified = true;
-                    } else if ((opmerkingenString != null) &&
-                            (!opmerkingenString.equals(titelRecord.opmerkingenString))) {
-                        titelRecord.opmerkingenString = opmerkingenString;
-                        rowModified = true;
-                    }
-                    break;
+            case 6:
+                String opmerkingenString = (String)object;
+                if (((opmerkingenString == null) || (opmerkingenString.length() == 0)) &&
+                        (titelRecord.opmerkingenString != null)) {
+                    titelRecord.opmerkingenString = null;
+                    rowModified = true;
+                } else if ((opmerkingenString != null) &&
+                        (!opmerkingenString.equals(titelRecord.opmerkingenString))) {
+                    titelRecord.opmerkingenString = opmerkingenString;
+                    rowModified = true;
+                }
+                break;
 
-                default:
-                    logger.info("Editing not yet supported for column: " + column);
-                    // logger.severe( "Invalid column: " + column );
-                    return;
+            default:
+                logger.info("Editing not yet supported for column: " + column);
+                // logger.severe( "Invalid column: " + column );
+                return;
             }
 	} catch ( Exception exception ) {
 	    logger.severe( "could not get value from " +

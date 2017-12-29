@@ -517,7 +517,7 @@ public class EditTitel extends JInternalFrame {
                         deleteString += " AND auteurs_id = " + selectedTitelKey.getAuteursId( );
                         deleteString += " AND boek_id = " + selectedTitelKey.getBoekId( );
 
-                        logger.info( "deleteString: " + deleteString );
+                        logger.fine( "deleteString: " + deleteString );
 
                         try {
                             Statement statement = connection.createStatement( );

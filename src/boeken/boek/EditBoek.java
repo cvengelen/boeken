@@ -380,7 +380,7 @@ public class EditBoek extends JInternalFrame {
 			} catch ( SQLException sqlException ) {
                             JOptionPane.showMessageDialog( thisFrame,
                                                            "SQL exception in select: " + sqlException.getMessage(),
-                                                           "EditBoekSQL exception",
+                                                           "EditBoek SQL exception",
                                                            JOptionPane.ERROR_MESSAGE );
 			    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 			    return;
@@ -396,10 +396,8 @@ public class EditBoek extends JInternalFrame {
 
 			if ( result != JOptionPane.YES_OPTION ) return;
 
-			String deleteString  = "DELETE FROM boek";
-			deleteString += " WHERE boek_id = " + selectedBoekId;
-
-			logger.info( "deleteString: " + deleteString );
+			final String deleteString = "DELETE FROM boek WHERE boek_id = " + selectedBoekId;
+			logger.fine( "deleteString: " + deleteString );
 
 			try {
 			    Statement statement = connection.createStatement( );
@@ -416,7 +414,7 @@ public class EditBoek extends JInternalFrame {
 			} catch ( SQLException sqlException ) {
                             JOptionPane.showMessageDialog( thisFrame,
                                                            "SQL exception in delete: " + sqlException.getMessage(),
-                                                           "EditBoekSQL exception",
+                                                           "EditBoek SQL exception",
                                                            JOptionPane.ERROR_MESSAGE );
 			    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 			    return;
