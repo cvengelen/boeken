@@ -123,6 +123,22 @@ public class Boeken extends JFrame implements ActionListener {
         menuItem.addActionListener(this);
         menuBar.add(menuItem);
 
+        // Edit label
+        menuItem = new JMenuItem("Label", KeyEvent.VK_L);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.ALT_MASK));
+        menuItem.setActionCommand("editLabel");
+        menuItem.setMaximumSize(maximumSize);
+        menuItem.addActionListener(this);
+        menuBar.add(menuItem);
+
+        // Edit persoon
+        menuItem = new JMenuItem("Persoon", KeyEvent.VK_P);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.ALT_MASK));
+        menuItem.setActionCommand("editPersoon");
+        menuItem.setMaximumSize(maximumSize);
+        menuItem.addActionListener(this);
+        menuBar.add(menuItem);
+
         return menuBar;
     }
 
@@ -141,6 +157,12 @@ public class Boeken extends JFrame implements ActionListener {
             break;
         case "editEditors":
             internalFrame = new boeken.editors.EditEditors(connection, this, xOffset * openFrameCount, yOffset * openFrameCount);
+            break;
+        case "editLabel":
+            internalFrame = new boeken.label.EditLabel(connection, xOffset * openFrameCount, yOffset * openFrameCount);
+            break;
+        case "editPersoon":
+            internalFrame = new boeken.persoon.EditPersoon(connection, xOffset * openFrameCount, yOffset * openFrameCount);
             break;
         }
 

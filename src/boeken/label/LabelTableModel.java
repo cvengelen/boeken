@@ -2,11 +2,13 @@
 
 package boeken.label;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import javax.swing.*;
 import javax.swing.table.*;
 import java.util.*;
 import java.util.logging.*;
@@ -16,7 +18,9 @@ import java.util.regex.*;
 class LabelTableModel extends AbstractTableModel {
     private final Logger logger = Logger.getLogger( LabelTableModel.class.getCanonicalName() );
 
-    private Connection connection;
+    private final Connection connection;
+    private final Component  parentComponent;
+
     private final String[ ] headings = { "Id", "Label" };
 
     private class LabelRecord {
@@ -38,8 +42,9 @@ class LabelTableModel extends AbstractTableModel {
 
 
     // Constructor
-    LabelTableModel( Connection connection ) {
-	this.connection = connection;
+    LabelTableModel( Connection connection, final Component  parentComponent) {
+        this.connection = connection;
+        this.parentComponent = parentComponent;
 
 	setupLabelTableModel( null );
     }
@@ -48,9 +53,7 @@ class LabelTableModel extends AbstractTableModel {
 
 	// Setup the table
 	try {
-	    String labelQueryString =
-		"SELECT label.label_id, label.label " +
-		"FROM label ";
+	    String labelQueryString = "SELECT label.label_id, label.label FROM label ";
 
 	    if ( ( labelFilterString != null ) && ( labelFilterString.length( ) > 0 ) ) {
 		// Matcher to find single quotes in labelFilterString, in order to replace these
@@ -78,6 +81,10 @@ class LabelTableModel extends AbstractTableModel {
 	    // Trigger update of table data
 	    fireTableDataChanged( );
 	} catch ( SQLException sqlException ) {
+            JOptionPane.showMessageDialog(parentComponent,
+                                          "SQL exception in select: " + sqlException.getMessage(),
+                                          "LabelTableModel exception",
+                                          JOptionPane.ERROR_MESSAGE);
 	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 	}
     }
@@ -150,8 +157,7 @@ class LabelTableModel extends AbstractTableModel {
 		return;
 	    }
 	} catch ( Exception exception ) {
-	    logger.severe( "could not get value from " +
-			   object + " for column " + column + " in row " + row );
+	    logger.severe( "could not get value from " + object + " for column " + column + " in row " + row );
 	    return;
 	}
 
@@ -161,20 +167,21 @@ class LabelTableModel extends AbstractTableModel {
 	// Store record in list
 	labelRecordList.set( row, labelRecord );
 
-	updateString = ( "UPDATE label SET " + updateString +
-			 " WHERE label_id = " + labelRecord.labelId );
-
-	logger.info( "updateString: " + updateString );
+	updateString = "UPDATE label SET " + updateString + " WHERE label_id = " + labelRecord.labelId;
+	logger.fine( "updateString: " + updateString );
 
 	try {
 	    Statement statement = connection.createStatement( );
 	    int nUpdate = statement.executeUpdate( updateString );
 	    if ( nUpdate != 1 ) {
-	    	logger.severe( "Could not update record with label_id " + labelRecord.labelId +
-			       " in label, nUpdate = " + nUpdate );
+	    	logger.severe( "Could not update record with label_id " + labelRecord.labelId + " in label, nUpdate = " + nUpdate );
 	    	return;
 	    }
 	} catch ( SQLException sqlException ) {
+            JOptionPane.showMessageDialog(parentComponent,
+                                          "SQL exception in update: " + sqlException.getMessage(),
+                                          "LabelTableModel exception",
+                                          JOptionPane.ERROR_MESSAGE);
 	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 	    return;
 	}

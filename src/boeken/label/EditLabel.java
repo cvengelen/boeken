@@ -16,22 +16,22 @@ import table.*;
 
 /**
  * Frame to show, insert and update records in the label table in schema boeken.
- * An instance of LabelFrame is created by class boeken.Main.
  */
-public class LabelFrame {
-    private final Logger logger = Logger.getLogger( LabelFrame.class.getCanonicalName() );
+public class EditLabel extends JInternalFrame {
+    private final Logger logger = Logger.getLogger( EditLabel.class.getCanonicalName() );
 
-    private final JFrame frame = new JFrame( "Label" );
-
+    private final JInternalFrame thisFrame;
     private LabelTableModel labelTableModel;
     private TableSorter labelTableSorter;
 
-    public LabelFrame( final Connection connection ) {
+    public EditLabel(final Connection connection, int x, int y ) {
+        super("Edit label", true, true, true, true);
+        this.thisFrame = this;
 
-	// put the controls the content pane
-	Container container = frame.getContentPane();
+        // Get the container from the internal frame
+        final Container container = getContentPane();
 
-	// Set grid bag layout manager
+        // Set grid bag layout manager
 	container.setLayout( new GridBagLayout( ) );
 	GridBagConstraints constraints = new GridBagConstraints( );
 
@@ -57,7 +57,7 @@ public class LabelFrame {
         } );
 
 	// Create label table from label table model
-	labelTableModel = new LabelTableModel( connection );
+	labelTableModel = new LabelTableModel( connection, thisFrame );
 	labelTableSorter = new TableSorter( labelTableModel );
 	final JTable labelTable = new JTable( labelTableSorter );
 	labelTableSorter.setTableHeader( labelTable.getTableHeader( ) );
@@ -122,8 +122,8 @@ public class LabelFrame {
 	class ButtonActionListener implements ActionListener {
 	    public void actionPerformed( ActionEvent actionEvent ) {
 		if ( actionEvent.getActionCommand( ).equals( "close" ) ) {
-		    frame.setVisible( false );
-                    frame.dispose();
+		    setVisible( false );
+                    dispose();
 		    return;
 		} else if ( actionEvent.getActionCommand( ).equals( "add" ) ) {
 		    try {
@@ -141,16 +141,20 @@ public class LabelFrame {
 			    logger.severe( "Could not insert in label" );
 			    return;
 			}
-		    } catch ( SQLException ex ) {
-			logger.severe( "SQLException: " + ex.getMessage( ) );
+		    } catch ( SQLException sqlException ) {
+                        JOptionPane.showMessageDialog(thisFrame,
+                                                      "SQL exception: " + sqlException.getMessage(),
+                                                      "EditLabel SQL exception",
+                                                      JOptionPane.ERROR_MESSAGE);
+			logger.severe( "SQLException: " + sqlException.getMessage( ) );
 			return;
 		    }
 		} else {
 		    int selectedRow = labelListSelectionListener.getSelectedRow( );
 		    if ( selectedRow < 0 ) {
-			JOptionPane.showMessageDialog( frame,
+			JOptionPane.showMessageDialog( thisFrame,
 						       "Geen Label geselecteerd",
-						       "Label frame error",
+						       "Edit label error",
 						       JOptionPane.ERROR_MESSAGE );
 			return;
 		    }
@@ -160,9 +164,9 @@ public class LabelFrame {
 
 		    // Check if label has been selected
 		    if ( selectedLabelId == 0 ) {
-			JOptionPane.showMessageDialog( frame,
+			JOptionPane.showMessageDialog( thisFrame,
 						       "Geen label geselecteerd",
-						       "Label frame error",
+						       "Edit label error",
 						       JOptionPane.ERROR_MESSAGE );
 			return;
 		    }
@@ -181,47 +185,50 @@ public class LabelFrame {
 				statement.executeQuery( "SELECT label_id FROM boek WHERE label_id = " +
 							selectedLabelId );
 			    if ( resultSet.next( ) ) {
-				JOptionPane.showMessageDialog( frame,
-							       "Tabel boek heeft nog verwijzing naar '" +
-							       labelString + "'",
-							       "Label frame error",
+				JOptionPane.showMessageDialog( thisFrame,
+							       "Tabel boek heeft nog verwijzing naar '" + labelString + "'",
+							       "Edit label error",
 							       JOptionPane.ERROR_MESSAGE );
 				return;
 			    }
 			} catch ( SQLException sqlException ) {
+                            JOptionPane.showMessageDialog(thisFrame,
+                                                          "SQL exception in select: " + sqlException.getMessage(),
+                                                          "EditLabel SQL exception",
+                                                          JOptionPane.ERROR_MESSAGE);
 			    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 			    return;
 			}
 
-			int result =
-			    JOptionPane.showConfirmDialog( frame,
-							   "Delete '" + labelString + "' ?",
-							   "Delete Label record",
-							   JOptionPane.YES_NO_OPTION,
-							   JOptionPane.QUESTION_MESSAGE,
-							   null );
+			int result = JOptionPane.showConfirmDialog( thisFrame,
+                                                                    "Delete '" + labelString + "' ?",
+                                                                    "Delete label record",
+                                                                    JOptionPane.YES_NO_OPTION,
+                                                                    JOptionPane.QUESTION_MESSAGE,
+                                                                    null );
 
 			if ( result != JOptionPane.YES_OPTION ) return;
 
-			String deleteString  = "DELETE FROM label";
-			deleteString += " WHERE label_id = " + selectedLabelId;
-
-			logger.info( "deleteString: " + deleteString );
+			final String deleteString = "DELETE FROM label WHERE label_id = " + selectedLabelId;
+			logger.fine( "deleteString: " + deleteString );
 
 			try {
 			    Statement statement = connection.createStatement( );
 			    int nUpdate = statement.executeUpdate( deleteString );
 			    if ( nUpdate != 1 ) {
-				String errorString = ( "Could not delete record with label_id  = " +
-						       selectedLabelId + " in label" );
-				JOptionPane.showMessageDialog( frame,
+				final String errorString = "Could not delete record with label_id  = " + selectedLabelId + " in label";
+				JOptionPane.showMessageDialog( thisFrame,
 							       errorString,
-							       "Delete Label record",
+							       "Edit label error",
 							       JOptionPane.ERROR_MESSAGE);
 				logger.severe( errorString );
 				return;
 			    }
 			} catch ( SQLException sqlException ) {
+                            JOptionPane.showMessageDialog(thisFrame,
+                                                          "SQL exception in delete: " + sqlException.getMessage(),
+                                                          "EditLabel SQL exception",
+                                                          JOptionPane.ERROR_MESSAGE);
 			    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 			    return;
 			}
@@ -260,21 +267,9 @@ public class LabelFrame {
         constraints.fill = GridBagConstraints.BOTH;
 	container.add( buttonPanel, constraints );
 
-        // Add a window listener to close the connection when the frame is disposed
-        frame.addWindowListener( new WindowAdapter() {
-            @Override
-            public void windowClosed(WindowEvent e) {
-                try {
-                    // Close the connection to the MySQL database
-                    connection.close( );
-                } catch (SQLException sqlException) {
-                    logger.severe( "SQL exception closing connection: " + sqlException.getMessage() );
-                }
-            }
-        } );
-
-        frame.setSize( 310, 500 );
-	frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-	frame.setVisible(true);
+        setSize( 310, 500 );
+        setLocation(x, y);
+	setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+	setVisible(true);
     }
 }
