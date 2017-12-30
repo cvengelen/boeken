@@ -17,13 +17,13 @@ import table.*;
 
 /**
  * Frame to show, insert and update records in the vertalers table in schema boeken.
- * An instance of VertalersFrame is created by class boeken.Main.
+ * An instance of EditVertalers is created by class boeken.Main.
  */
-public class VertalersFrame {
-    private final Logger logger = Logger.getLogger( VertalersFrame.class.getCanonicalName() );
+public class EditVertalers extends JInternalFrame {
+    private final Logger logger = Logger.getLogger( EditVertalers.class.getCanonicalName() );
 
     private final Connection connection;
-    private final JFrame frame = new JFrame( "Vertalers" );
+    private final JFrame parentFrame;
 
     private JTextField vertalersFilterTextField;
 
@@ -44,17 +44,19 @@ public class VertalersFrame {
 	    // Check if vertalersId is present in table
 	    try {
 		Statement statement = connection.createStatement( );
-		ResultSet resultSet = statement.executeQuery( "SELECT vertalers_id FROM " + tableString +
-							      " WHERE vertalers_id = " + id );
+		ResultSet resultSet = statement.executeQuery( "SELECT vertalers_id FROM " + tableString + " WHERE vertalers_id = " + id );
 		if ( resultSet.next( ) ) {
-		    JOptionPane.showMessageDialog( frame,
-						   "Tabel " + tableString +
-						   " heeft nog verwijzing naar '" + string +"'",
-						   "Vertalers frame error",
+		    JOptionPane.showMessageDialog(EditVertalers.this,
+                                                  "Tabel " + tableString + " heeft nog verwijzing naar '" + string +"'",
+                                                  "Edit vertalers error",
 						   JOptionPane.ERROR_MESSAGE );
 		    return true;
 		}
 	    } catch ( SQLException sqlException ) {
+                JOptionPane.showMessageDialog(EditVertalers.this,
+                                              "SQL exception in select: " + sqlException.getMessage(),
+                                              "EditVertalers SQL exception",
+                                              JOptionPane.ERROR_MESSAGE );
 		logger.severe( "SQLException: " + sqlException.getMessage( ) );
 		return true;
 	    }
@@ -62,11 +64,14 @@ public class VertalersFrame {
 	}
     }
 
-    public VertalersFrame( final Connection connection ) {
-	this.connection = connection;
+    public EditVertalers(final Connection connection, final JFrame parentFrame, int x, int y ) {
+        super("Edit vertalers", true, true, true, true);
 
-	// put the controls the content pane
-	Container container = frame.getContentPane();
+        this.connection = connection;
+        this.parentFrame = parentFrame;
+
+        // Get the container from the internal frame
+        final Container container = getContentPane();
 
 	// Set grid bag layout manager
 	container.setLayout( new GridBagLayout( ) );
@@ -95,7 +100,7 @@ public class VertalersFrame {
 
 
 	// Create vertalers table from vertalers table model
-	vertalersTableModel = new VertalersTableModel( connection );
+	vertalersTableModel = new VertalersTableModel( connection, this );
 	vertalersTableSorter = new TableSorter( vertalersTableModel );
 	final JTable vertalersTable = new JTable( vertalersTableSorter );
 	vertalersTableSorter.setTableHeader( vertalersTable.getTableHeader( ) );
@@ -160,19 +165,19 @@ public class VertalersFrame {
 	class ButtonActionListener implements ActionListener {
 	    public void actionPerformed( ActionEvent actionEvent ) {
 		if ( actionEvent.getActionCommand( ).equals( "close" ) ) {
-		    frame.setVisible( false );
-                    frame.dispose();
+		    setVisible( false );
+                    dispose();
                     return;
 		} else if ( actionEvent.getActionCommand( ).equals( "insert" ) ) {
 		    // Insert new vertalers record
-		    new EditVertalersDialog( connection, frame,
+		    new EditVertalersDialog( connection, parentFrame,
                                              vertalersFilterTextField.getText( ) );
 		} else {
 		    int selectedRow = vertalersListSelectionListener.getSelectedRow( );
 		    if ( selectedRow < 0 ) {
-			JOptionPane.showMessageDialog( frame,
+			JOptionPane.showMessageDialog( EditVertalers.this,
 						       "Geen vertalers geselecteerd",
-						       "Vertalers frame error",
+						       "Edit vertalers error",
 						       JOptionPane.ERROR_MESSAGE );
 			return;
 		    }
@@ -182,16 +187,16 @@ public class VertalersFrame {
 
 		    // Check if vertalers has been selected
 		    if ( selectedVertalersId == 0 ) {
-			JOptionPane.showMessageDialog( frame,
+			JOptionPane.showMessageDialog( EditVertalers.this,
 						       "Geen vertalers geselecteerd",
-						       "Vertalers frame error",
+						       "Edit vertalers error",
 						       JOptionPane.ERROR_MESSAGE );
 			return;
 		    }
 
 		    if ( actionEvent.getActionCommand( ).equals( "edit" ) ) {
 			// Do dialog
-			new EditVertalersDialog( connection, frame, selectedVertalersId );
+			new EditVertalersDialog( connection, parentFrame, selectedVertalersId );
 		    } else if ( actionEvent.getActionCommand( ).equals( "delete" ) ) {
 			final Vertalers vertalers = new Vertalers( vertalersTableModel.getVertalersId( selectedRow ),
 								   vertalersTableModel.getVertalersString( selectedRow ) );
@@ -205,35 +210,34 @@ public class VertalersFrame {
 			    vertalers.string = " ";
 			}
 
-			int result =
-			    JOptionPane.showConfirmDialog( frame,
-							   "Delete '" + vertalers.string + "' ?",
-							   "Delete Vertalers record",
-							   JOptionPane.YES_NO_OPTION,
-							   JOptionPane.QUESTION_MESSAGE,
-							   null );
-
+			int result = JOptionPane.showConfirmDialog( EditVertalers.this,
+                                                                    "Delete '" + vertalers.string + "' ?",
+                                                                    "Delete vertalers record",
+                                                                    JOptionPane.YES_NO_OPTION,
+                                                                    JOptionPane.QUESTION_MESSAGE,
+                                                                    null );
 			if ( result != JOptionPane.YES_OPTION ) return;
 
-			String deleteString  = "DELETE FROM vertalers";
-			deleteString += " WHERE vertalers_id = " + vertalers.id;
-
-			logger.info( "deleteString: " + deleteString );
+			final String deleteString  = "DELETE FROM vertalers WHERE vertalers_id = " + vertalers.id;
+			logger.fine( "deleteString: " + deleteString );
 
 			try {
 			    Statement statement = connection.createStatement( );
 			    int nUpdate = statement.executeUpdate( deleteString );
 			    if ( nUpdate != 1 ) {
-				String errorString = ( "Could not delete record with vertalers_id  = " +
-						       vertalers.id + " in vertalers" );
-				JOptionPane.showMessageDialog( frame,
+				final String errorString = "Could not delete record with vertalers_id  = " + vertalers.id + " in vertalers";
+				JOptionPane.showMessageDialog( EditVertalers.this,
 							       errorString,
-							       "Delete Vertalers record",
+							       "Edit vertalers error",
 							       JOptionPane.ERROR_MESSAGE);
 				logger.severe( errorString );
 				return;
 			    }
 			} catch ( SQLException sqlException ) {
+                            JOptionPane.showMessageDialog(EditVertalers.this,
+                                                          "SQL exception in delete: " + sqlException.getMessage(),
+                                                          "EditVertalers SQL exception",
+                                                           JOptionPane.ERROR_MESSAGE );
 			    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 			    return;
 			}
@@ -281,21 +285,9 @@ public class VertalersFrame {
 	constraints.anchor = GridBagConstraints.CENTER;
 	container.add( buttonPanel, constraints );
 
-        // Add a window listener to close the connection when the frame is disposed
-        frame.addWindowListener( new WindowAdapter() {
-            @Override
-            public void windowClosed(WindowEvent e) {
-                try {
-                    // Close the connection to the MySQL database
-                    connection.close( );
-                } catch (SQLException sqlException) {
-                    logger.severe( "SQL exception closing connection: " + sqlException.getMessage() );
-                }
-            }
-        } );
-
-	frame.setSize( 460, 500 );
-	frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-	frame.setVisible(true);
+	setSize( 460, 500 );
+	setLocation(x, y);
+	setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+	setVisible(true);
     }
 }

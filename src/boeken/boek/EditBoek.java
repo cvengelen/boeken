@@ -39,8 +39,6 @@ public class EditBoek extends JInternalFrame {
     public EditBoek( final Connection connection, final JFrame parentFrame, int x, int y ) {
         super("Edit boek", true, true, true, true);
 
-        JInternalFrame thisFrame = this;
-
         // Get the container from the internal frame
         final Container container = getContentPane();
 
@@ -119,7 +117,7 @@ public class EditBoek extends JInternalFrame {
 	container.add( new JLabel( "Uitgever:" ), constraints );
 
 	// Setup a JComboBox with the results of the query on uitgever
-	uitgeverComboBox = new UitgeverComboBox( connection, thisFrame, false );
+	uitgeverComboBox = new UitgeverComboBox( connection, EditBoek.this, false );
         constraints.insets = new Insets( 5, 5, 5, 20 );
 	constraints.gridx = GridBagConstraints.RELATIVE;
         constraints.anchor = GridBagConstraints.WEST;
@@ -177,7 +175,7 @@ public class EditBoek extends JInternalFrame {
 	final JButton deleteBoekButton = new JButton( "Delete" );
 
 	// Create boek table from boek table model
-	boekTableModel = new BoekTableModel( connection, thisFrame, cancelBoekButton, saveBoekButton );
+	boekTableModel = new BoekTableModel( connection, EditBoek.this, cancelBoekButton, saveBoekButton );
 	boekTableSorter = new TableSorter( boekTableModel );
 	final JTable boekTable = new JTable( boekTableSorter );
 	boekTableSorter.setTableHeader( boekTable.getTableHeader( ) );
@@ -199,13 +197,13 @@ public class EditBoek extends JInternalFrame {
 	final DefaultCellEditor typeDefaultCellEditor = new DefaultCellEditor( new TypeComboBox( connection ) );
 	boekTable.getColumnModel( ).getColumn( 2 ).setCellEditor( typeDefaultCellEditor );
 
-	final DefaultCellEditor uitgeverDefaultCellEditor = new DefaultCellEditor( new UitgeverComboBox( connection, thisFrame, false ) );
+	final DefaultCellEditor uitgeverDefaultCellEditor = new DefaultCellEditor( new UitgeverComboBox( connection, EditBoek.this, false ) );
 	boekTable.getColumnModel( ).getColumn( 3 ).setCellEditor( uitgeverDefaultCellEditor );
 
 	final DefaultCellEditor statusDefaultCellEditor = new DefaultCellEditor( new StatusComboBox( connection ) );
 	boekTable.getColumnModel( ).getColumn( 6 ).setCellEditor( statusDefaultCellEditor );
 
-	final DefaultCellEditor labelDefaultCellEditor = new DefaultCellEditor( new LabelComboBox( connection, thisFrame, false ) );
+	final DefaultCellEditor labelDefaultCellEditor = new DefaultCellEditor( new LabelComboBox( connection, EditBoek.this, false ) );
 	boekTable.getColumnModel( ).getColumn( 7 ).setCellEditor( labelDefaultCellEditor );
 
 	// Set vertical size just enough for 20 entries
@@ -239,7 +237,7 @@ public class EditBoek extends JInternalFrame {
 			logger.severe( "Invalid selected row" );
 		    } else {
 			int result =
-			    JOptionPane.showConfirmDialog( thisFrame,
+			    JOptionPane.showConfirmDialog( EditBoek.this,
 							   "Data zijn gewijzigd: modificaties opslaan?",
 							   "Record is gewijzigd",
 							   JOptionPane.YES_NO_OPTION,
@@ -249,7 +247,7 @@ public class EditBoek extends JInternalFrame {
 			if ( result == JOptionPane.YES_OPTION ) {
 			    // Save the changes in the table model, and in the database
 			    if ( !( boekTableModel.saveEditRow( selectedRow ) ) ) {
-				JOptionPane.showMessageDialog( thisFrame,
+				JOptionPane.showMessageDialog( EditBoek.this,
 							       "Error: row not saved",
 							       "Save boek record error",
 							       JOptionPane.ERROR_MESSAGE );
@@ -326,7 +324,7 @@ public class EditBoek extends JInternalFrame {
 		} else {
 		    int selectedRow = boekListSelectionListener.getSelectedRow( );
 		    if ( selectedRow < 0 ) {
-			JOptionPane.showMessageDialog( thisFrame,
+			JOptionPane.showMessageDialog( EditBoek.this,
 						       "Geen boek geselecteerd",
 						       "Edit boek error",
 						       JOptionPane.ERROR_MESSAGE );
@@ -338,7 +336,7 @@ public class EditBoek extends JInternalFrame {
 
 		    // Check if boek has been selected
 		    if ( selectedBoekId == 0 ) {
-			JOptionPane.showMessageDialog( thisFrame,
+			JOptionPane.showMessageDialog( EditBoek.this,
 						       "Geen boek geselecteerd",
 						       "Edit boek error",
 						       JOptionPane.ERROR_MESSAGE );
@@ -370,7 +368,7 @@ public class EditBoek extends JInternalFrame {
 				statement.executeQuery( "SELECT boek_id FROM titel WHERE boek_id = " +
 							selectedBoekId );
 			    if ( resultSet.next( ) ) {
-				JOptionPane.showMessageDialog( thisFrame,
+				JOptionPane.showMessageDialog( EditBoek.this,
 							       "Tabel titel heeft nog verwijzing naar '" +
 							       selectedBoekString + "'",
 							       "Edit boek error",
@@ -378,7 +376,7 @@ public class EditBoek extends JInternalFrame {
 				return;
 			    }
 			} catch ( SQLException sqlException ) {
-                            JOptionPane.showMessageDialog( thisFrame,
+                            JOptionPane.showMessageDialog( EditBoek.this,
                                                            "SQL exception in select: " + sqlException.getMessage(),
                                                            "EditBoek SQL exception",
                                                            JOptionPane.ERROR_MESSAGE );
@@ -387,7 +385,7 @@ public class EditBoek extends JInternalFrame {
 			}
 
 			int result =
-			    JOptionPane.showConfirmDialog( thisFrame,
+			    JOptionPane.showConfirmDialog( EditBoek.this,
 							   "Delete '" + selectedBoekString + "' ?",
 							   "Delete Boek record",
 							   JOptionPane.YES_NO_OPTION,
@@ -404,7 +402,7 @@ public class EditBoek extends JInternalFrame {
 			    int nUpdate = statement.executeUpdate( deleteString );
 			    if ( nUpdate != 1 ) {
 				final String errorString = "Could not delete record with boek_id  = " + selectedBoekId + " in boek";
-				JOptionPane.showMessageDialog( thisFrame,
+				JOptionPane.showMessageDialog( EditBoek.this,
 							       errorString,
 							       "Edit boek rerror",
 							       JOptionPane.ERROR_MESSAGE);
@@ -412,7 +410,7 @@ public class EditBoek extends JInternalFrame {
 				return;
 			    }
 			} catch ( SQLException sqlException ) {
-                            JOptionPane.showMessageDialog( thisFrame,
+                            JOptionPane.showMessageDialog( EditBoek.this,
                                                            "SQL exception in delete: " + sqlException.getMessage(),
                                                            "EditBoek SQL exception",
                                                            JOptionPane.ERROR_MESSAGE );
@@ -448,7 +446,7 @@ public class EditBoek extends JInternalFrame {
 		    } else if ( actionEvent.getActionCommand( ).equals( "save" ) ) {
 			// Save the changes in the table model, and in the database
 			if ( !( boekTableModel.saveEditRow( selectedRow ) ) ) {
-			    JOptionPane.showMessageDialog( thisFrame,
+			    JOptionPane.showMessageDialog( EditBoek.this,
 							   "Error: row not saved",
 							   "Save boek record error",
 							   JOptionPane.ERROR_MESSAGE );

@@ -23,7 +23,6 @@ public class EditAuteurs extends JInternalFrame {
 
     private final Connection connection;
     private final JFrame parentFrame;
-    private final JInternalFrame thisFrame;
 
     private JTextField auteursFilterTextField;
 
@@ -44,20 +43,19 @@ public class EditAuteurs extends JInternalFrame {
 	    // Check if auteursId is present in table
 	    try {
 		Statement statement = connection.createStatement( );
-		ResultSet resultSet = statement.executeQuery( "SELECT auteurs_id FROM " + tableString +
-							      " WHERE auteurs_id = " + id );
+		ResultSet resultSet = statement.executeQuery( "SELECT auteurs_id FROM " + tableString + " WHERE auteurs_id = " + id );
 		if ( resultSet.next( ) ) {
-		    JOptionPane.showMessageDialog( thisFrame,
-						   "Tabel " + tableString + " heeft nog verwijzing naar '" + string + "'",
-						   "Edit auteurs error",
-						   JOptionPane.ERROR_MESSAGE );
+		    JOptionPane.showMessageDialog(EditAuteurs.this,
+                                                  "Tabel " + tableString + " heeft nog verwijzing naar '" + string + "'",
+                                                  "Edit auteurs error",
+                                                  JOptionPane.ERROR_MESSAGE );
 		    return true;
 		}
 	    } catch ( SQLException sqlException ) {
-                JOptionPane.showMessageDialog( thisFrame,
-                                               "SQL exception in select: " + sqlException.getMessage(),
-                                               "EditAuteurs SQL exception",
-                                               JOptionPane.ERROR_MESSAGE );
+                JOptionPane.showMessageDialog(EditAuteurs.this,
+                                              "SQL exception in select: " + sqlException.getMessage(),
+                                              "EditAuteurs SQL exception",
+                                              JOptionPane.ERROR_MESSAGE );
 		logger.severe( "SQLException: " + sqlException.getMessage( ) );
 		return true;
 	    }
@@ -70,7 +68,6 @@ public class EditAuteurs extends JInternalFrame {
 
         this.connection = connection;
         this.parentFrame = parentFrame;
-        this.thisFrame = this;
 
         // Get the container from the internal frame
         final Container container = getContentPane();
@@ -103,7 +100,7 @@ public class EditAuteurs extends JInternalFrame {
         });
 
         // Create auteurs table from auteurs table model
-        auteursTableModel = new AuteursTableModel(connection, thisFrame);
+        auteursTableModel = new AuteursTableModel(connection, EditAuteurs.this);
         auteursTableSorter = new TableSorter(auteursTableModel);
         JTable auteursTable = new JTable(auteursTableSorter);
         auteursTableSorter.setTableHeader(auteursTable.getTableHeader());
@@ -181,7 +178,7 @@ public class EditAuteurs extends JInternalFrame {
                 } else {
                     int selectedRow = auteursListSelectionListener.getSelectedRow();
                     if (selectedRow < 0) {
-                        JOptionPane.showMessageDialog(thisFrame,
+                        JOptionPane.showMessageDialog(EditAuteurs.this,
                                                       "Geen auteurs geselecteerd",
                                                       "Edit auteurs error",
                                                       JOptionPane.ERROR_MESSAGE);
@@ -193,7 +190,7 @@ public class EditAuteurs extends JInternalFrame {
 
                     // Check if auteurs has been selected
                     if (selectedAuteursId == 0) {
-                        JOptionPane.showMessageDialog(thisFrame,
+                        JOptionPane.showMessageDialog(EditAuteurs.this,
                                                       "Geen auteurs geselecteerd",
                                                       "Edit auteurs error",
                                                       JOptionPane.ERROR_MESSAGE);
@@ -217,7 +214,7 @@ public class EditAuteurs extends JInternalFrame {
                         }
 
                         int result =
-                                JOptionPane.showConfirmDialog(thisFrame,
+                                JOptionPane.showConfirmDialog(EditAuteurs.this,
                                                               "Delete '" + auteurs.string + "' ?",
                                                               "Delete Auteurs record",
                                                               JOptionPane.YES_NO_OPTION,
@@ -234,7 +231,7 @@ public class EditAuteurs extends JInternalFrame {
                             int nUpdate = statement.executeUpdate(deleteString);
                             if (nUpdate != 1) {
                                 final String errorString = "Could not delete record with auteurs_id  = " + auteurs.id + " in auteurs";
-                                JOptionPane.showMessageDialog(thisFrame,
+                                JOptionPane.showMessageDialog(EditAuteurs.this,
                                                               errorString,
                                                               "Edit auteurs error",
                                                               JOptionPane.ERROR_MESSAGE);
@@ -242,7 +239,7 @@ public class EditAuteurs extends JInternalFrame {
                                 return;
                             }
                         } catch (SQLException sqlException) {
-                            JOptionPane.showMessageDialog(thisFrame,
+                            JOptionPane.showMessageDialog(EditAuteurs.this,
                                                           "SQL exception in delete: " + sqlException.getMessage(),
                                                           "EditAuteurs SQL exception",
                                                           JOptionPane.ERROR_MESSAGE);

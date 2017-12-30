@@ -2,11 +2,13 @@
 
 package boeken.uitgever;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import javax.swing.*;
 import javax.swing.table.*;
 import java.util.*;
 import java.util.logging.*;
@@ -16,7 +18,9 @@ import java.util.regex.*;
 class UitgeverTableModel extends AbstractTableModel {
     private final Logger logger = Logger.getLogger( UitgeverTableModel.class.getCanonicalName() );
 
-    private Connection connection;
+    private final Connection connection;
+    private final Component  parentComponent;
+
     private final String[ ] headings = { "Id", "Uitgever", "ISBN 1", "ISBN 2" };
 
     private class UitgeverRecord {
@@ -44,8 +48,9 @@ class UitgeverTableModel extends AbstractTableModel {
 
 
     // Constructor
-    UitgeverTableModel( Connection connection ) {
-	this.connection = connection;
+    UitgeverTableModel( Connection connection, final Component  parentComponent) {
+        this.connection = connection;
+        this.parentComponent = parentComponent;
 
 	setupUitgeverTableModel( null );
     }
@@ -53,16 +58,13 @@ class UitgeverTableModel extends AbstractTableModel {
     void setupUitgeverTableModel( String uitgeverFilterString ) {
 	// Setup the table
 	try {
-	    String uitgeverQueryString =
-		"SELECT uitgever.uitgever, uitgever.isbn_1, uitgever.isbn_2, uitgever.uitgever_id " +
-		"FROM uitgever ";
+	    String uitgeverQueryString = "SELECT uitgever.uitgever, uitgever.isbn_1, uitgever.isbn_2, uitgever.uitgever_id FROM uitgever ";
 
 	    if ( ( uitgeverFilterString != null ) && ( uitgeverFilterString.length( ) > 0 ) ) {
 		// Matcher to find single quotes in uitgeverFilterString, in order to replace these
 		// with escaped quotes (the quadruple slashes are really necessary)
 		Matcher quoteMatcher = quotePattern.matcher( uitgeverFilterString );
-		uitgeverQueryString +=
-		    "WHERE uitgever.uitgever LIKE \"%" + quoteMatcher.replaceAll( "\\\\'" ) + "%\" ";
+		uitgeverQueryString += "WHERE uitgever.uitgever LIKE \"%" + quoteMatcher.replaceAll( "\\\\'" ) + "%\" ";
 	    }
 
 	    uitgeverQueryString += "ORDER BY uitgever.uitgever";
@@ -86,6 +88,10 @@ class UitgeverTableModel extends AbstractTableModel {
 	    // Trigger update of table data
 	    fireTableDataChanged( );
 	} catch ( SQLException sqlException ) {
+            JOptionPane.showMessageDialog(parentComponent,
+                                          "SQL exception in select: " + sqlException.getMessage(),
+                                          "UitgeverTableModel exception",
+                                          JOptionPane.ERROR_MESSAGE);
 	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 	}
     }
@@ -196,8 +202,7 @@ class UitgeverTableModel extends AbstractTableModel {
 		return;
 	    }
 	} catch ( Exception exception ) {
-	    logger.severe( "could not get value from " +
-			   object + " for column " + column + " in row " + row );
+	    logger.severe( "could not get value from " + object + " for column " + column + " in row " + row );
 	    return;
 	}
 
@@ -207,10 +212,8 @@ class UitgeverTableModel extends AbstractTableModel {
 	// Store record in list
 	uitgeverRecordList.set( row, uitgeverRecord );
 
-	updateString = ( "UPDATE uitgever SET " + updateString +
-			 " WHERE uitgever_id = " + uitgeverRecord.uitgeverId );
-
-	logger.info( "updateString: " + updateString );
+	updateString = "UPDATE uitgever SET " + updateString + " WHERE uitgever_id = " + uitgeverRecord.uitgeverId;
+	logger.fine( "updateString: " + updateString );
 
 	try {
 	    Statement statement = connection.createStatement( );
@@ -221,6 +224,10 @@ class UitgeverTableModel extends AbstractTableModel {
 	    	return;
 	    }
 	} catch ( SQLException sqlException ) {
+            JOptionPane.showMessageDialog(parentComponent,
+                                          "SQL exception in update: " + sqlException.getMessage(),
+                                          "UitgeverTableModel exception",
+                                          JOptionPane.ERROR_MESSAGE);
 	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 	    return;
 	}

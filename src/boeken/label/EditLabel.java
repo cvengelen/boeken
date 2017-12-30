@@ -20,13 +20,11 @@ import table.*;
 public class EditLabel extends JInternalFrame {
     private final Logger logger = Logger.getLogger( EditLabel.class.getCanonicalName() );
 
-    private final JInternalFrame thisFrame;
     private LabelTableModel labelTableModel;
     private TableSorter labelTableSorter;
 
     public EditLabel(final Connection connection, int x, int y ) {
         super("Edit label", true, true, true, true);
-        this.thisFrame = this;
 
         // Get the container from the internal frame
         final Container container = getContentPane();
@@ -57,7 +55,7 @@ public class EditLabel extends JInternalFrame {
         } );
 
 	// Create label table from label table model
-	labelTableModel = new LabelTableModel( connection, thisFrame );
+	labelTableModel = new LabelTableModel( connection, EditLabel.this );
 	labelTableSorter = new TableSorter( labelTableModel );
 	final JTable labelTable = new JTable( labelTableSorter );
 	labelTableSorter.setTableHeader( labelTable.getTableHeader( ) );
@@ -142,7 +140,7 @@ public class EditLabel extends JInternalFrame {
 			    return;
 			}
 		    } catch ( SQLException sqlException ) {
-                        JOptionPane.showMessageDialog(thisFrame,
+                        JOptionPane.showMessageDialog(EditLabel.this,
                                                       "SQL exception: " + sqlException.getMessage(),
                                                       "EditLabel SQL exception",
                                                       JOptionPane.ERROR_MESSAGE);
@@ -152,7 +150,7 @@ public class EditLabel extends JInternalFrame {
 		} else {
 		    int selectedRow = labelListSelectionListener.getSelectedRow( );
 		    if ( selectedRow < 0 ) {
-			JOptionPane.showMessageDialog( thisFrame,
+			JOptionPane.showMessageDialog( EditLabel.this,
 						       "Geen Label geselecteerd",
 						       "Edit label error",
 						       JOptionPane.ERROR_MESSAGE );
@@ -164,7 +162,7 @@ public class EditLabel extends JInternalFrame {
 
 		    // Check if label has been selected
 		    if ( selectedLabelId == 0 ) {
-			JOptionPane.showMessageDialog( thisFrame,
+			JOptionPane.showMessageDialog( EditLabel.this,
 						       "Geen label geselecteerd",
 						       "Edit label error",
 						       JOptionPane.ERROR_MESSAGE );
@@ -185,14 +183,14 @@ public class EditLabel extends JInternalFrame {
 				statement.executeQuery( "SELECT label_id FROM boek WHERE label_id = " +
 							selectedLabelId );
 			    if ( resultSet.next( ) ) {
-				JOptionPane.showMessageDialog( thisFrame,
+				JOptionPane.showMessageDialog( EditLabel.this,
 							       "Tabel boek heeft nog verwijzing naar '" + labelString + "'",
 							       "Edit label error",
 							       JOptionPane.ERROR_MESSAGE );
 				return;
 			    }
 			} catch ( SQLException sqlException ) {
-                            JOptionPane.showMessageDialog(thisFrame,
+                            JOptionPane.showMessageDialog(EditLabel.this,
                                                           "SQL exception in select: " + sqlException.getMessage(),
                                                           "EditLabel SQL exception",
                                                           JOptionPane.ERROR_MESSAGE);
@@ -200,7 +198,7 @@ public class EditLabel extends JInternalFrame {
 			    return;
 			}
 
-			int result = JOptionPane.showConfirmDialog( thisFrame,
+			int result = JOptionPane.showConfirmDialog( EditLabel.this,
                                                                     "Delete '" + labelString + "' ?",
                                                                     "Delete label record",
                                                                     JOptionPane.YES_NO_OPTION,
@@ -217,7 +215,7 @@ public class EditLabel extends JInternalFrame {
 			    int nUpdate = statement.executeUpdate( deleteString );
 			    if ( nUpdate != 1 ) {
 				final String errorString = "Could not delete record with label_id  = " + selectedLabelId + " in label";
-				JOptionPane.showMessageDialog( thisFrame,
+				JOptionPane.showMessageDialog( EditLabel.this,
 							       errorString,
 							       "Edit label error",
 							       JOptionPane.ERROR_MESSAGE);
@@ -225,7 +223,7 @@ public class EditLabel extends JInternalFrame {
 				return;
 			    }
 			} catch ( SQLException sqlException ) {
-                            JOptionPane.showMessageDialog(thisFrame,
+                            JOptionPane.showMessageDialog(EditLabel.this,
                                                           "SQL exception in delete: " + sqlException.getMessage(),
                                                           "EditLabel SQL exception",
                                                           JOptionPane.ERROR_MESSAGE);

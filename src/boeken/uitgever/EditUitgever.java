@@ -16,22 +16,20 @@ import table.*;
 
 /**
  * Frame to show, insert and update records in the uitgever table in schema boeken.
- * An instance of UitgeverFrame is created by class boeken.Main.
  */
-public class UitgeverFrame {
-    private final Logger logger = Logger.getLogger( UitgeverFrame.class.getCanonicalName() );
-
-    private final JFrame frame = new JFrame( "Uitgever" );
+public class EditUitgever extends JInternalFrame {
+    private final Logger logger = Logger.getLogger( EditUitgever.class.getCanonicalName() );
 
     private JTextField uitgeverFilterTextField;
 
     private UitgeverTableModel uitgeverTableModel;
     private TableSorter uitgeverTableSorter;
 
-    public UitgeverFrame( final Connection connection ) {
+    public EditUitgever(final Connection connection , int x, int y ) {
+        super("Edit uitgever", true, true, true, true);
 
-	// put the controls the content pane
-	Container container = frame.getContentPane();
+        // Get the container from the internal frame
+        final Container container = getContentPane();
 
 	// Set grid bag layout manager
 	container.setLayout( new GridBagLayout( ) );
@@ -59,7 +57,7 @@ public class UitgeverFrame {
         } );
 
         // Create uitgever table from uitgever table model
-	uitgeverTableModel = new UitgeverTableModel( connection );
+	uitgeverTableModel = new UitgeverTableModel( connection, this );
 	uitgeverTableSorter = new TableSorter( uitgeverTableModel );
 	final JTable uitgeverTable = new JTable( uitgeverTableSorter );
 	uitgeverTableSorter.setTableHeader( uitgeverTable.getTableHeader( ) );
@@ -126,8 +124,8 @@ public class UitgeverFrame {
 	class ButtonActionListener implements ActionListener {
 	    public void actionPerformed( ActionEvent actionEvent ) {
 		if ( actionEvent.getActionCommand( ).equals( "close" ) ) {
-		    frame.setVisible( false );
-                    frame.dispose();
+		    setVisible( false );
+                    dispose();
                     return;
 		} else if ( actionEvent.getActionCommand( ).equals( "insert" ) ) {
 		    try {
@@ -145,16 +143,20 @@ public class UitgeverFrame {
 			    logger.severe( "Could not insert in uitgever" );
 			    return;
 			}
-		    } catch ( SQLException ex ) {
-			logger.severe( "SQLException: " + ex.getMessage( ) );
+		    } catch ( SQLException sqlException ) {
+                        JOptionPane.showMessageDialog(EditUitgever.this,
+                                                      "SQL exception in select: " + sqlException.getMessage(),
+                                                      "EditUitgever SQL exception",
+                                                      JOptionPane.ERROR_MESSAGE );
+			logger.severe( "SQLException: " + sqlException.getMessage( ) );
 			return;
 		    }
 		} else {
 		    int selectedRow = uitgeverListSelectionListener.getSelectedRow( );
 		    if ( selectedRow < 0 ) {
-			JOptionPane.showMessageDialog( frame,
+			JOptionPane.showMessageDialog( EditUitgever.this,
 						       "Geen uitgever geselecteerd",
-						       "Uitgever frame error",
+						       "Edit uitgever error",
 						       JOptionPane.ERROR_MESSAGE );
 			return;
 		    }
@@ -164,9 +166,9 @@ public class UitgeverFrame {
 
 		    // Check if uitgever has been selected
 		    if ( selectedUitgeverId == 0 ) {
-			JOptionPane.showMessageDialog( frame,
+			JOptionPane.showMessageDialog( EditUitgever.this,
 						       "Geen uitgever geselecteerd",
-						       "Uitgever frame error",
+						       "Edit uitgever error",
 						       JOptionPane.ERROR_MESSAGE );
 			return;
 		    }
@@ -185,47 +187,50 @@ public class UitgeverFrame {
 				statement.executeQuery( "SELECT uitgever_id FROM boek WHERE uitgever_id = " +
 							selectedUitgeverId );
 			    if ( resultSet.next( ) ) {
-				JOptionPane.showMessageDialog( frame,
+				JOptionPane.showMessageDialog( EditUitgever.this,
 							       "Tabel boek heeft nog verwijzing naar '" +
 							       selectedUitgeverString + "'",
-							       "Uitgever frame error",
+							       "Edit uitgever error",
 							       JOptionPane.ERROR_MESSAGE );
 				return;
 			    }
 			} catch ( SQLException sqlException ) {
+                            JOptionPane.showMessageDialog(EditUitgever.this,
+                                                          "SQL exception in select: " + sqlException.getMessage(),
+                                                          "EditUitgever SQL exception",
+                                                          JOptionPane.ERROR_MESSAGE );
 			    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 			    return;
 			}
 
-			int result =
-			    JOptionPane.showConfirmDialog( frame,
-							   "Delete '" + selectedUitgeverString + "' ?",
-							   "Delete Uitgever record",
-							   JOptionPane.YES_NO_OPTION,
-							   JOptionPane.QUESTION_MESSAGE,
-							   null );
-
+			int result = JOptionPane.showConfirmDialog( EditUitgever.this,
+                                                                    "Delete '" + selectedUitgeverString + "' ?",
+                                                                    "Delete uitgever record",
+                                                                    JOptionPane.YES_NO_OPTION,
+                                                                    JOptionPane.QUESTION_MESSAGE,
+                                                                    null );
 			if ( result != JOptionPane.YES_OPTION ) return;
 
-			String deleteString  = "DELETE FROM uitgever";
-			deleteString += " WHERE uitgever_id = " + selectedUitgeverId;
-
-			logger.info( "deleteString: " + deleteString );
+			final String deleteString = "DELETE FROM uitgever WHERE uitgever_id = " + selectedUitgeverId;
+			logger.fine( "deleteString: " + deleteString );
 
 			try {
 			    Statement statement = connection.createStatement( );
 			    int nUpdate = statement.executeUpdate( deleteString );
 			    if ( nUpdate != 1 ) {
-				String errorString = ( "Could not delete record with uitgever_id  = " +
-						       selectedUitgeverId + " in uitgever" );
-				JOptionPane.showMessageDialog( frame,
+				final String errorString = "Could not delete record with uitgever_id  = " + selectedUitgeverId + " in uitgever";
+				JOptionPane.showMessageDialog( EditUitgever.this,
 							       errorString,
-							       "Delete Uitgever record",
+							       "Edit uitgever error",
 							       JOptionPane.ERROR_MESSAGE);
 				logger.severe( errorString );
 				return;
 			    }
 			} catch ( SQLException sqlException ) {
+                            JOptionPane.showMessageDialog(EditUitgever.this,
+                                                          "SQL exception in delete: " + sqlException.getMessage(),
+                                                          "EditUitgever SQL exception",
+                                                          JOptionPane.ERROR_MESSAGE );
 			    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 			    return;
 			}
@@ -264,21 +269,9 @@ public class UitgeverFrame {
         constraints.fill    = GridBagConstraints.NONE;
 	container.add( buttonPanel, constraints );
 
-        // Add a window listener to close the connection when the frame is disposed
-        frame.addWindowListener( new WindowAdapter() {
-            @Override
-            public void windowClosed(WindowEvent e) {
-                try {
-                    // Close the connection to the MySQL database
-                    connection.close( );
-                } catch (SQLException sqlException) {
-                    logger.severe( "SQL exception closing connection: " + sqlException.getMessage() );
-                }
-            }
-        } );
-
-	frame.setSize( 610, 500 );
-	frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-	frame.setVisible(true);
+	setSize( 610, 500 );
+	setLocation(x, y);
+	setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+	setVisible(true);
     }
 }

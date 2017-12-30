@@ -23,7 +23,6 @@ public class EditEditors extends JInternalFrame {
 
     private final Connection connection;
     private final JFrame parentFrame;
-    private final JInternalFrame thisFrame;
 
     private JTextField editorsFilterTextField;
 
@@ -47,7 +46,7 @@ public class EditEditors extends JInternalFrame {
 		ResultSet resultSet = statement.executeQuery( "SELECT editors_id FROM " + tableString +
 							      " WHERE editors_id = " + id );
 		if ( resultSet.next( ) ) {
-		    JOptionPane.showMessageDialog( thisFrame,
+		    JOptionPane.showMessageDialog( EditEditors.this,
 						   "Tabel " + tableString +
 						   " heeft nog verwijzing naar '" + string + "'",
 						   "edit editors error",
@@ -55,7 +54,7 @@ public class EditEditors extends JInternalFrame {
 		    return true;
 		}
 	    } catch ( SQLException sqlException ) {
-                JOptionPane.showMessageDialog( thisFrame,
+                JOptionPane.showMessageDialog( EditEditors.this,
                                                "SQL exception in select: " + sqlException.getMessage(),
                                                "EditEditors SQL exception",
                                                JOptionPane.ERROR_MESSAGE );
@@ -71,7 +70,6 @@ public class EditEditors extends JInternalFrame {
 
         this.connection = connection;
         this.parentFrame = parentFrame;
-        this.thisFrame = this;
 
         // Get the container from the internal frame
         final Container container = getContentPane();
@@ -102,7 +100,7 @@ public class EditEditors extends JInternalFrame {
         });
 
         // Create editors table from editors table model
-        editorsTableModel = new EditorsTableModel(connection, thisFrame);
+        editorsTableModel = new EditorsTableModel(connection, EditEditors.this);
         editorsTableSorter = new TableSorter(editorsTableModel);
         final JTable editorsTable = new JTable(editorsTableSorter);
         editorsTableSorter.setTableHeader(editorsTable.getTableHeader());
@@ -179,7 +177,7 @@ public class EditEditors extends JInternalFrame {
                 } else {
                     int selectedRow = editorsListSelectionListener.getSelectedRow();
                     if (selectedRow < 0) {
-                        JOptionPane.showMessageDialog(thisFrame,
+                        JOptionPane.showMessageDialog(EditEditors.this,
                                                       "Geen editors geselecteerd",
                                                       "edit editors error",
                                                       JOptionPane.ERROR_MESSAGE);
@@ -191,7 +189,7 @@ public class EditEditors extends JInternalFrame {
 
                     // Check if editors has been selected
                     if (selectedEditorsId == 0) {
-                        JOptionPane.showMessageDialog(thisFrame,
+                        JOptionPane.showMessageDialog(EditEditors.this,
                                                       "Geen editors geselecteerd",
                                                       "edit editors error",
                                                       JOptionPane.ERROR_MESSAGE);
@@ -214,7 +212,7 @@ public class EditEditors extends JInternalFrame {
                             editors.string = " ";
                         }
 
-                        int result = JOptionPane.showConfirmDialog(thisFrame,
+                        int result = JOptionPane.showConfirmDialog(EditEditors.this,
                                                                    "Delete '" + editors.string + "' ?",
                                                                    "Delete Editors record",
                                                                    JOptionPane.YES_NO_OPTION,
@@ -232,7 +230,7 @@ public class EditEditors extends JInternalFrame {
                             if (nUpdate != 1) {
                                 String errorString = ("Could not delete record with editors_id  = " +
                                         editors.id + " in editors");
-                                JOptionPane.showMessageDialog(thisFrame,
+                                JOptionPane.showMessageDialog(EditEditors.this,
                                                               errorString,
                                                               "Edit editors error",
                                                               JOptionPane.ERROR_MESSAGE);
@@ -240,7 +238,7 @@ public class EditEditors extends JInternalFrame {
                                 return;
                             }
                         } catch (SQLException sqlException) {
-                            JOptionPane.showMessageDialog(thisFrame,
+                            JOptionPane.showMessageDialog(EditEditors.this,
                                                           "SQL exception in delete: " + sqlException.getMessage(),
                                                           "EditEditors SQL exception",
                                                           JOptionPane.ERROR_MESSAGE);

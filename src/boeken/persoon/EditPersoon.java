@@ -21,7 +21,6 @@ public class EditPersoon extends JInternalFrame {
     private final Logger logger = Logger.getLogger( EditPersoon.class.getCanonicalName() );
 
     private final Connection connection;
-    private final JInternalFrame thisFrame;
 
     private PersoonTableModel persoonTableModel;
     private TableSorter persoonTableSorter;
@@ -43,7 +42,7 @@ public class EditPersoon extends JInternalFrame {
 		ResultSet resultSet = statement.executeQuery( "SELECT persoon_id FROM " + tableString +
 							      " WHERE persoon_id = " + id );
 		if ( resultSet.next( ) ) {
-		    JOptionPane.showMessageDialog( thisFrame,
+		    JOptionPane.showMessageDialog( EditPersoon.this,
 						   "Tabel " + tableString +
 						   " heeft nog verwijzing naar '" + name + "'",
 						   "Edit persoon error",
@@ -51,7 +50,7 @@ public class EditPersoon extends JInternalFrame {
 		    return true;
 		}
 	    } catch ( SQLException sqlException ) {
-	        JOptionPane.showMessageDialog(thisFrame,
+	        JOptionPane.showMessageDialog(EditPersoon.this,
                                               "SQL exception in select: " + sqlException.getMessage(),
                                               "EditPersoon SQL exception",
                                               JOptionPane.ERROR_MESSAGE);
@@ -66,7 +65,6 @@ public class EditPersoon extends JInternalFrame {
         super("Edit persoon", true, true, true, true);
 
         this.connection = connection;
-        this.thisFrame = this;
 
         // Get the container from the internal frame
         final Container container = getContentPane();
@@ -98,7 +96,7 @@ public class EditPersoon extends JInternalFrame {
         } );
 
         // Create persoon table from persoon table model
-	persoonTableModel = new PersoonTableModel( connection, thisFrame );
+	persoonTableModel = new PersoonTableModel( connection, EditPersoon.this );
 	persoonTableSorter = new TableSorter( persoonTableModel );
 	final JTable persoonTable = new JTable( persoonTableSorter );
 	persoonTableSorter.setTableHeader( persoonTable.getTableHeader( ) );
@@ -183,7 +181,7 @@ public class EditPersoon extends JInternalFrame {
 			    return;
 			}
 		    } catch ( SQLException sqlException ) {
-                        JOptionPane.showMessageDialog(thisFrame,
+                        JOptionPane.showMessageDialog(EditPersoon.this,
                                                       "SQL exception: " + sqlException.getMessage(),
                                                       "EditPersoon SQL exception",
                                                       JOptionPane.ERROR_MESSAGE);
@@ -193,7 +191,7 @@ public class EditPersoon extends JInternalFrame {
 		} else {
 		    int selectedRow = persoonListSelectionListener.getSelectedRow( );
 		    if ( selectedRow < 0 ) {
-			JOptionPane.showMessageDialog( thisFrame,
+			JOptionPane.showMessageDialog( EditPersoon.this,
 						       "Geen Persoon geselecteerd",
 						       "Edit persoon error",
 						       JOptionPane.ERROR_MESSAGE );
@@ -205,7 +203,7 @@ public class EditPersoon extends JInternalFrame {
 
 		    // Check if persoon has been selected
 		    if ( selectedPersoonId == 0 ) {
-			JOptionPane.showMessageDialog( thisFrame,
+			JOptionPane.showMessageDialog( EditPersoon.this,
 						       "Geen persoon geselecteerd",
 						       "Edit persoon error",
 						       JOptionPane.ERROR_MESSAGE );
@@ -226,7 +224,7 @@ public class EditPersoon extends JInternalFrame {
 			    persoon.name = " ";
 			}
 
-			int result = JOptionPane.showConfirmDialog( thisFrame,
+			int result = JOptionPane.showConfirmDialog( EditPersoon.this,
                                                                     "Delete '" + persoon.name + "' ?",
                                                                     "Delete Persoon record",
                                                                     JOptionPane.YES_NO_OPTION,
@@ -243,7 +241,7 @@ public class EditPersoon extends JInternalFrame {
 			    if ( nUpdate != 1 ) {
 				String errorString = ( "Could not delete record with persoon_id  = " +
 						       persoon.id + " in persoon" );
-				JOptionPane.showMessageDialog( thisFrame,
+				JOptionPane.showMessageDialog( EditPersoon.this,
 							       errorString,
 							       "Delete Persoon record",
 							       JOptionPane.ERROR_MESSAGE);
@@ -251,7 +249,7 @@ public class EditPersoon extends JInternalFrame {
 				return;
 			    }
 			} catch ( SQLException sqlException ) {
-                            JOptionPane.showMessageDialog(thisFrame,
+                            JOptionPane.showMessageDialog(EditPersoon.this,
                                                           "SQL exception in delete: " + sqlException.getMessage(),
                                                           "EditPersoon SQL exception",
                                                           JOptionPane.ERROR_MESSAGE);

@@ -2,11 +2,13 @@
 
 package boeken.vertalers;
 
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import javax.swing.*;
 import javax.swing.table.*;
 import java.util.*;
 import java.util.logging.*;
@@ -16,7 +18,9 @@ import java.util.regex.*;
 class VertalersTableModel extends AbstractTableModel {
     private final Logger logger = Logger.getLogger( VertalersTableModel.class.getCanonicalName() );
 
-    private Connection connection;
+    private final Connection connection;
+    private final Component  parentComponent;
+
     private final String[ ] headings = { "Id", "Vertalers", "Persoon" };
 
     private class VertalersRecord {
@@ -44,8 +48,9 @@ class VertalersTableModel extends AbstractTableModel {
 
 
     // Constructor
-    VertalersTableModel( Connection connection ) {
-	this.connection = connection;
+    VertalersTableModel( Connection connection, final Component  parentComponent) {
+        this.connection = connection;
+        this.parentComponent = parentComponent;
 
 	setupVertalersTableModel( null );
     }
@@ -90,6 +95,10 @@ class VertalersTableModel extends AbstractTableModel {
 	    // Trigger update of table data
 	    fireTableDataChanged( );
 	} catch ( SQLException sqlException ) {
+            JOptionPane.showMessageDialog(parentComponent,
+                                          "SQL exception in select: " + sqlException.getMessage(),
+                                          "VertalersTableModel exception",
+                                          JOptionPane.ERROR_MESSAGE);
 	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 	}
     }
@@ -170,27 +179,28 @@ class VertalersTableModel extends AbstractTableModel {
 		return;
 	    }
 	} catch ( Exception exception ) {
-	    logger.severe( "could not get value from " +
-			   object + " for column " + column + " in row " + row );
+	    logger.severe( "could not get value from " + object + " for column " + column + " in row " + row );
 	    return;
 	}
 
 	// Check if update is not necessary
 	if ( updateString == null ) return;
 
-	updateString = ( "UPDATE vertalers SET " + updateString +
-			 " WHERE vertalers_id = " + vertalersRecord.vertalersId );
-	logger.info( "updateString: " + updateString );
+	updateString = "UPDATE vertalers SET " + updateString + " WHERE vertalers_id = " + vertalersRecord.vertalersId;
+	logger.fine( "updateString: " + updateString );
 
 	try {
 	    Statement statement = connection.createStatement( );
 	    int nUpdate = statement.executeUpdate( updateString );
 	    if ( nUpdate != 1 ) {
-		logger.severe( "Could not update record with vertalers_id " + vertalersRecord.vertalersId +
-			       " in vertalers, nUpdate = " + nUpdate );
+		logger.severe( "Could not update record with vertalers_id " + vertalersRecord.vertalersId + " in vertalers, nUpdate = " + nUpdate );
 		return;
 	    }
 	} catch ( SQLException sqlException ) {
+            JOptionPane.showMessageDialog(parentComponent,
+                                          "SQL exception in update: " + sqlException.getMessage(),
+                                          "VertalersTableModel exception",
+                                          JOptionPane.ERROR_MESSAGE);
 	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 	    return;
 	}

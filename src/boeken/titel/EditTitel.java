@@ -48,8 +48,6 @@ public class EditTitel extends JInternalFrame {
     public EditTitel(final Connection connection, JFrame parentFrame, int x, int y ) {
         super("Edit boek", true, true, true, true);
 
-        JInternalFrame thisFrame = this;
-
         // Get the container from the internal frame
         final Container container = getContentPane();
 
@@ -153,7 +151,7 @@ public class EditTitel extends JInternalFrame {
         auteursPanel.setBorder( emptyBorder );
 
         // Setup a JComboBox with the results of the query on auteurs
-        auteursComboBox = new AuteursComboBox( connection, thisFrame, false );
+        auteursComboBox = new AuteursComboBox( connection, EditTitel.this, false );
         auteursPanel.add( auteursComboBox );
 
         auteursComboBox.addActionListener( ( ActionEvent actionEvent ) -> {
@@ -298,7 +296,7 @@ public class EditTitel extends JInternalFrame {
         final JButton deleteTitelButton = new JButton( "Delete" );
 
         // Create titel table from title table model
-        titelTableModel = new TitelTableModel( connection, thisFrame, cancelTitelButton, saveTitelButton );
+        titelTableModel = new TitelTableModel( connection, EditTitel.this, cancelTitelButton, saveTitelButton );
         titelTableSorter = new TableSorter( titelTableModel );
         final JTable titelTable = new JTable( titelTableSorter );
         titelTableSorter.setTableHeader( titelTable.getTableHeader( ) );
@@ -357,7 +355,7 @@ public class EditTitel extends JInternalFrame {
                     if ( selectedRow == -1 ) {
                         logger.severe( "Invalid selected row" );
                     } else {
-                        int result = JOptionPane.showConfirmDialog(thisFrame,
+                        int result = JOptionPane.showConfirmDialog(EditTitel.this,
                                                                    "Data zijn gewijzigd: modificaties opslaan?",
                                                                    "Record is gewijzigd",
                                                                    JOptionPane.YES_NO_OPTION,
@@ -367,7 +365,7 @@ public class EditTitel extends JInternalFrame {
                         if ( result == JOptionPane.YES_OPTION ) {
                             // Save the changes in the table model, and in the database
                             if ( !( titelTableModel.saveEditRow( selectedRow ) ) ) {
-                                JOptionPane.showMessageDialog(thisFrame,
+                                JOptionPane.showMessageDialog(EditTitel.this,
                                                               "Error: row not saved",
                                                               "Save titel record error",
                                                               JOptionPane.ERROR_MESSAGE );
@@ -456,7 +454,7 @@ public class EditTitel extends JInternalFrame {
                 } else {
                     int selectedRow = titelListSelectionListener.getSelectedRow( );
                     if ( selectedRow < 0 ) {
-                        JOptionPane.showMessageDialog( thisFrame,
+                        JOptionPane.showMessageDialog( EditTitel.this,
                                                        "Geen titel geselecteerd",
                                                        "Edit titel error",
                                                        JOptionPane.ERROR_MESSAGE );
@@ -468,7 +466,7 @@ public class EditTitel extends JInternalFrame {
 
                     // Check if titel has been selected
                     if ( selectedTitelKey == new TitelKey( ) ) {
-                        JOptionPane.showMessageDialog( thisFrame,
+                        JOptionPane.showMessageDialog( EditTitel.this,
                                                        "Geen titel geselecteerd",
                                                        "Edit titel error",
                                 JOptionPane.ERROR_MESSAGE );
@@ -494,7 +492,7 @@ public class EditTitel extends JInternalFrame {
                         if ( ( titelString == null ) || ( titelString.length( ) == 0 ) ) {
                             titelString = " ";
                         }
-                        int result = JOptionPane.showConfirmDialog( thisFrame,
+                        int result = JOptionPane.showConfirmDialog( EditTitel.this,
                                                                     "Delete '" + titelString + "' ?",
                                                                     "Delete Boek record",
                                                                     JOptionPane.YES_NO_OPTION,
@@ -524,7 +522,7 @@ public class EditTitel extends JInternalFrame {
                             int nUpdate = statement.executeUpdate( deleteString );
                             if ( nUpdate != 1 ) {
                                 final String errorString = "Could not delete record with titel '" + selectedTitelKey.getTitelString( ) + "' in titel";
-                                JOptionPane.showMessageDialog( thisFrame,
+                                JOptionPane.showMessageDialog( EditTitel.this,
                                                                errorString,
                                                                "Delete titel record",
                                                                JOptionPane.ERROR_MESSAGE );
@@ -532,7 +530,7 @@ public class EditTitel extends JInternalFrame {
                                 return;
                             }
                         } catch ( SQLException sqlException ) {
-                            JOptionPane.showMessageDialog( thisFrame,
+                            JOptionPane.showMessageDialog( EditTitel.this,
                                                            "SQL exception in delete: " + sqlException.getMessage(),
                                                            "EditTitel SQL exception",
                                                            JOptionPane.ERROR_MESSAGE );
@@ -571,7 +569,7 @@ public class EditTitel extends JInternalFrame {
                     } else if ( actionEvent.getActionCommand( ).equals( "save" ) ) {
                         // Save the changes in the table model, and in the database
                         if ( !( titelTableModel.saveEditRow( selectedRow ) ) ) {
-                            JOptionPane.showMessageDialog( thisFrame,
+                            JOptionPane.showMessageDialog( EditTitel.this,
                                                            "Error: row not saved",
                                                            "Edit titel error",
                                                            JOptionPane.ERROR_MESSAGE );
