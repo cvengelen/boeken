@@ -13,13 +13,10 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class EditBoekDialog {
+public class EditBoekDialog extends JDialog {
     final private Logger logger = Logger.getLogger( EditBoekDialog.class.getCanonicalName() );
 
     private final Connection connection;
-    private final Object parentObject;
-
-    private JDialog dialog;
 
     private int boekId = 0;
     private String defaultBoekString = "";
@@ -86,40 +83,61 @@ public class EditBoekDialog {
 
     // Constructor for inserting a book
     public EditBoekDialog( Connection connection,
-			   Object     parentObject,
+                           JDialog    parentDialog,
 			   String     defaultBoekString ) {
+        super(parentDialog, "Insert boek", true);
+
 	this.connection = connection;
-	this.parentObject = parentObject;
 	this.defaultBoekString = defaultBoekString;
 
-	setupBoekDialog( "Insert boek", "Insert", insertBoekActionCommand );
+	setupBoekDialog("Insert", insertBoekActionCommand);
     }
 
     // Constructor for inserting a book
     public EditBoekDialog( Connection connection,
-			   Object     parentObject,
+			   JFrame     parentFrame,
 			   String     defaultBoekString,
 			   int	      defaultTypeId,
 			   int	      defaultUitgeverId,
 			   int	      defaultStatusId ) {
+        super(parentFrame, "Insert boek", true);
+
         this.connection = connection;
-	this.parentObject = parentObject;
 	this.defaultBoekString = defaultBoekString;
 	this.defaultTypeId = defaultTypeId;
 	this.defaultUitgeverId = defaultUitgeverId;
 	this.defaultStatusId = defaultStatusId;
 
-	setupBoekDialog( "Insert boek", "Insert", insertBoekActionCommand );
+	setupBoekDialog("Insert", insertBoekActionCommand);
     }
 
     // Constructor for updating an existing book
     public EditBoekDialog( Connection connection,
-			   Object     parentObject,
+			   JDialog    parentDialog,
 			   int        boekId ) {
-	this.connection = connection;
-	this.parentObject = parentObject;
-	this.boekId = boekId;
+        super(parentDialog, "Edit boek", true);
 
+        this.connection = connection;
+        this.boekId = boekId;
+
+        getDefaultBoek();
+        setupBoekDialog("Update", updateBoekActionCommand);
+    }
+
+    // Constructor for updating an existing book
+    public EditBoekDialog( Connection connection,
+                           JFrame     parentFrame,
+                           int        boekId ) {
+        super(parentFrame, "Edit boek", true);
+
+        this.connection = connection;
+        this.boekId = boekId;
+
+        getDefaultBoek();
+        setupBoekDialog("Update", updateBoekActionCommand);
+    }
+
+    private void getDefaultBoek() {
 	try {
 	    Statement statement = connection.createStatement( );
 	    ResultSet resultSet = statement.executeQuery( "SELECT boek.boek, boek.editors_id, boek.bundel_id, " +
@@ -152,27 +170,13 @@ public class EditBoekDialog {
 	} catch ( SQLException sqlException ) {
 	    logger.severe( "SQLException: " + sqlException.getMessage( ) );
 	}
-
-	setupBoekDialog( "Edit boek", "Update", updateBoekActionCommand );
     }
 
     // Setup boek dialog
-    private void setupBoekDialog( String dialogTitle,
-                                  String editBoekButtonText,
-                                  String editBoekButtonActionCommand ) {
-	// Create modal dialog for editing boek record
-	if ( parentObject instanceof JFrame ) {
-	    dialog = new JDialog( ( JFrame )parentObject, dialogTitle, true );
-	} else if ( parentObject instanceof JDialog ) {
-	    dialog = new JDialog( ( JDialog )parentObject, dialogTitle, true );
-	} else {
-	    logger.severe( "Unexpected parent object class: " +
-			   parentObject.getClass( ).getName( ) );
-	    return;
-	}
+    private void setupBoekDialog(String editBoekButtonText, String editBoekButtonActionCommand) {
 
 	// Set grid bag layout manager
-	Container container = dialog.getContentPane( );
+	Container container = getContentPane( );
 	container.setLayout( new GridBagLayout( ) );
 
 	GridBagConstraints constraints = new GridBagConstraints( );
@@ -190,8 +194,7 @@ public class EditBoekDialog {
 	container.add( boekTextField, constraints );
 
 	// Setup a JComboBox with the results of the query on uitgever
-	uitgeverComboBox = new UitgeverComboBox( connection, dialog,
-						 defaultUitgeverId );
+	uitgeverComboBox = new UitgeverComboBox( connection, this, defaultUitgeverId );
 	constraints.gridx = 0;
 	constraints.gridy = 1;
 	constraints.gridwidth = 1;
@@ -207,7 +210,7 @@ public class EditBoekDialog {
 		if ( uitgeverComboBox.newUitgeverSelected( ) ) {
 		    // Insert new uitgever record
 		    EditUitgeverDialog editUitgeverDialog =
-			new EditUitgeverDialog( connection, dialog, uitgeverFilterString );
+			new EditUitgeverDialog( connection, EditBoekDialog.this, uitgeverFilterString );
 
 		    // Check if a new uitgever record has been inserted
 		    if ( editUitgeverDialog.uitgeverUpdated( ) ) {
@@ -252,7 +255,7 @@ public class EditBoekDialog {
 
 		// Check if uitgever has been selected
 		if ( selectedUitgeverId == 0 ) {
-		    JOptionPane.showMessageDialog( dialog,
+		    JOptionPane.showMessageDialog( EditBoekDialog.this,
 						   "Geen uitgever geselecteerd",
 						   "Select uitgever error",
 						   JOptionPane.ERROR_MESSAGE );
@@ -261,7 +264,7 @@ public class EditBoekDialog {
 
 		// Do dialog
 		EditUitgeverDialog editUitgeverDialog =
-		    new EditUitgeverDialog( connection, dialog, selectedUitgeverId );
+		    new EditUitgeverDialog( connection, EditBoekDialog.this, selectedUitgeverId );
 
 		if ( editUitgeverDialog.uitgeverUpdated( ) ) {
 		    // Show the ISBN-1 and ISBN-2
@@ -350,8 +353,7 @@ public class EditBoekDialog {
 	container.add( bundelComboBox, constraints );
 
 	// Setup a JComboBox with the results of the query on label
-	labelComboBox = new LabelComboBox( connection, dialog,
-					   defaultLabelId );
+	labelComboBox = new LabelComboBox( connection, this, defaultLabelId );
 	constraints.gridx = 0;
 	constraints.gridy = 8;
 	constraints.gridwidth = 1;
@@ -367,7 +369,7 @@ public class EditBoekDialog {
 		if ( labelComboBox.newLabelSelected( ) ) {
 		    // Insert new label record
 		    EditLabelDialog editLabelDialog =
-			new EditLabelDialog( connection, dialog, labelFilterString );
+			new EditLabelDialog( connection, EditBoekDialog.this, labelFilterString );
 
 		    // Check if a new label record has been inserted
 		    if ( editLabelDialog.labelUpdated( ) ) {
@@ -406,7 +408,7 @@ public class EditBoekDialog {
 
 		// Check if label has been selected
 		if ( selectedLabelId == 0 ) {
-		    JOptionPane.showMessageDialog( dialog,
+		    JOptionPane.showMessageDialog( EditBoekDialog.this,
 						   "Geen label geselecteerd",
 						   "Select label error",
 						   JOptionPane.ERROR_MESSAGE );
@@ -414,9 +416,7 @@ public class EditBoekDialog {
 		}
 
 		// Do dialog
-		EditLabelDialog editLabelDialog =
-		    new EditLabelDialog( connection, dialog, selectedLabelId );
-
+		EditLabelDialog editLabelDialog = new EditLabelDialog( connection, EditBoekDialog.this, selectedLabelId );
 		if ( editLabelDialog.labelUpdated( ) ) {
 		    // Setup the label combo box again
 		    labelComboBox.setupLabelComboBox( selectedLabelId );
@@ -468,8 +468,7 @@ public class EditBoekDialog {
 	editorsPersoonTableModel.showTable( defaultEditorsId );
 
 	// Setup a JComboBox with the results of the query on editors
-	editorsComboBox = new EditorsComboBox( connection, dialog,
-					       defaultEditorsId );
+	editorsComboBox = new EditorsComboBox( connection, this, defaultEditorsId );
 	constraints.gridx = 0;
 	constraints.gridy = 11;
 	constraints.gridwidth = 1;
@@ -488,7 +487,7 @@ public class EditBoekDialog {
 		if ( editorsComboBox.newEditorsSelected( ) ) {
 		    // Insert new editors record
 		    EditEditorsDialog editEditorsDialog =
-			new EditEditorsDialog( connection, dialog, editorsFilterString );
+			new EditEditorsDialog( connection, EditBoekDialog.this, editorsFilterString );
 
 		    // Check if a new editors record has been inserted
 		    if ( editEditorsDialog.editorsUpdated( ) ) {
@@ -530,7 +529,7 @@ public class EditBoekDialog {
 
 		// Check if editors has been selected
 		if ( selectedEditorsId == 0 ) {
-		    JOptionPane.showMessageDialog( dialog,
+		    JOptionPane.showMessageDialog( EditBoekDialog.this,
 						   "Geen editors geselecteerd",
 						   "Edit opus error",
 						   JOptionPane.ERROR_MESSAGE );
@@ -538,8 +537,7 @@ public class EditBoekDialog {
 		}
 
 		// Do dialog
-		EditEditorsDialog editEditorsDialog =
-		    new EditEditorsDialog( connection, dialog, selectedEditorsId );
+		EditEditorsDialog editEditorsDialog = new EditEditorsDialog( connection, EditBoekDialog.this, selectedEditorsId );
 
 		if ( editEditorsDialog.editorsUpdated( ) ) {
 		    // Show the selected editors
@@ -581,7 +579,7 @@ public class EditBoekDialog {
 		}
 
 		// Any other actionCommand, including cancel, has no action
-		dialog.setVisible( false );
+		setVisible( false );
 	    }
 	}
 
@@ -600,10 +598,9 @@ public class EditBoekDialog {
 	constraints.gridwidth = 2;
 	container.add( buttonPanel, constraints );
 
-
-	dialog.setSize( 900, 620 );
-	dialog.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-	dialog.setVisible(true);
+	setSize( 900, 620 );
+	setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+	setVisible(true);
     }
 
 
@@ -711,7 +708,7 @@ public class EditBoekDialog {
     private boolean insertBoek( ) {
 	String boekString = boekTextField.getText( );
 	if ( boekString == null || boekString.length( ) == 0 ) {
-	    JOptionPane.showMessageDialog( dialog,
+	    JOptionPane.showMessageDialog( this,
 					   "Boek titel niet ingevuld",
 					   "Insert Boek error",
 					   JOptionPane.ERROR_MESSAGE );
@@ -721,7 +718,7 @@ public class EditBoekDialog {
 	int paginas = ( Integer )paginasSpinner.getValue( );
 	int statusId = statusComboBox.getSelectedStatusId( );
 	if ( ( paginas == 0 ) && ( statusId != 0 ) && ( statusId != 10 ) ) {
-	    JOptionPane.showMessageDialog( dialog,
+	    JOptionPane.showMessageDialog( this,
 					   "Aantal paginas niet ingevuld",
 					   "Insert Boek error",
 					   JOptionPane.ERROR_MESSAGE);
@@ -792,7 +789,7 @@ public class EditBoekDialog {
 	    ResultSet resultSet = statement.executeQuery( "SELECT MAX( boek_id ) FROM boek" );
 	    if ( ! resultSet.next( ) ) {
 		logger.severe( "Could not get maximum for boek_id in boek" );
-		dialog.setVisible( false );
+		setVisible( false );
 		return false;
 	    }
 	    boekId = resultSet.getInt( 1 ) + 1;
@@ -802,7 +799,7 @@ public class EditBoekDialog {
 	    nUpdate = statement.executeUpdate( insertString );
 	    if ( nUpdate != 1 ) {
 	    	logger.severe( "Could not insert in boek" );
-	    	dialog.setVisible( false );
+	    	setVisible( false );
 	    	return false;
 	    }
 	} catch ( SQLException sqlException ) {
@@ -830,7 +827,7 @@ public class EditBoekDialog {
 	// Check if boek changed
 	if ( !boekString.equals( defaultBoekString ) ) {
 	    if ( boekString == null || boekString.length( ) == 0 ) {
-		JOptionPane.showMessageDialog( dialog,
+		JOptionPane.showMessageDialog( this,
 					       "Boek titel niet ingevuld",
 					       "Insert Boek error",
 					       JOptionPane.ERROR_MESSAGE );
@@ -847,7 +844,7 @@ public class EditBoekDialog {
 	// Check if paginas changed
 	if ( paginas != defaultPaginas ) {
 	    if ( ( paginas == 0 ) && ( statusId != 0 ) && ( statusId != 10 ) ) {
-		JOptionPane.showMessageDialog( dialog,
+		JOptionPane.showMessageDialog( this,
 					       "Aantal paginas niet ingevuld",
 					       "Insert Boek error",
 					       JOptionPane.ERROR_MESSAGE);
@@ -999,7 +996,7 @@ public class EditBoekDialog {
 	    nUpdate = statement.executeUpdate( updateString );
 	    if ( nUpdate != 1 ) {
 	    	logger.severe( "Could not update in boek" );
-	    	dialog.setVisible( false );
+	    	setVisible( false );
 	    	return false;
 	    }
 	} catch ( SQLException sqlException ) {
