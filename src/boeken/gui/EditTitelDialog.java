@@ -17,7 +17,7 @@ import javax.swing.*;
 
 
 public class EditTitelDialog extends JDialog {
-    final private Logger logger = Logger.getLogger( "boeken.gui.EditTitelDialog" );
+    final private Logger logger = Logger.getLogger( EditTitelDialog.class.getCanonicalName()  );
 
     private final Connection connection;
     private final JFrame parentFrame;
@@ -160,8 +160,6 @@ public class EditTitelDialog extends JDialog {
     private void setupTitelDialog( String editTitelButtonText,
                                    String editTitelButtonActionCommand ) {
 
-        final JDialog thisDialog = this;
-
 	// Set grid bag layout manager
 	Container container = getContentPane( );
 	container.setLayout( new GridBagLayout( ) );
@@ -206,7 +204,7 @@ public class EditTitelDialog extends JDialog {
 		if ( auteursComboBox.newAuteursSelected( ) ) {
 		    // Insert new auteurs record
 		    EditAuteursDialog editAuteursDialog =
-			new EditAuteursDialog( connection, this, auteursFilterString );
+			new EditAuteursDialog( connection, EditTitelDialog.this, auteursFilterString );
 
 		    // Check if a new auteurs record has been inserted
 		    if ( editAuteursDialog.auteursUpdated( ) ) {
@@ -251,7 +249,7 @@ public class EditTitelDialog extends JDialog {
 
 		// Check if auteurs has been selected
 		if ( selectedAuteursId == 0 ) {
-		    JOptionPane.showMessageDialog( thisDialog,
+		    JOptionPane.showMessageDialog( EditTitelDialog.this,
 						   "Geen auteurs geselecteerd",
 						   "Edit titel error",
 						   JOptionPane.ERROR_MESSAGE );
@@ -260,7 +258,7 @@ public class EditTitelDialog extends JDialog {
 
 		// Do dialog
 		EditAuteursDialog editAuteursDialog =
-		    new EditAuteursDialog( connection, thisDialog, selectedAuteursId );
+		    new EditAuteursDialog( connection, EditTitelDialog.this, selectedAuteursId );
 
 		if ( editAuteursDialog.auteursUpdated( ) ) {
 		    // Show the selected auteurs
@@ -295,10 +293,10 @@ public class EditTitelDialog extends JDialog {
 
 	if ( editTitelButtonActionCommand.equals( insertTitelActionCommand ) ) {
 	    // Setup a JComboBox with the results of the query on boek with the boek filter string
-	    boekComboBox = new BoekComboBox( connection, thisDialog, boekFilterString );
+	    boekComboBox = new BoekComboBox( connection, this, boekFilterString );
 	} else {
 	    // Setup a JComboBox with the results of the query on boek with the selected boek id
-	    boekComboBox = new BoekComboBox( connection, thisDialog, defaultBoekId );
+	    boekComboBox = new BoekComboBox( connection, this, defaultBoekId );
 	}
 	constraints.gridx = 0;
 	constraints.gridy = 4;
@@ -322,7 +320,7 @@ public class EditTitelDialog extends JDialog {
                     defaultBoekString.append( titelTextField.getText( ) );
 
 		    EditBoekDialog editBoekDialog =
-			new EditBoekDialog( connection, thisDialog, defaultBoekString.toString( ) );
+			new EditBoekDialog( connection, EditTitelDialog.this, defaultBoekString.toString( ) );
 
 		    // Check if a new boek record has been inserted
 		    if ( editBoekDialog.boekUpdated( ) ) {
@@ -362,7 +360,7 @@ public class EditTitelDialog extends JDialog {
 
 		// Check if boek has been selected
 		if ( selectedBoekId == 0 ) {
-		    JOptionPane.showMessageDialog( thisDialog,
+		    JOptionPane.showMessageDialog( EditTitelDialog.this,
 						   "Geen boek geselecteerd",
 						   "Edit titel error",
 						   JOptionPane.ERROR_MESSAGE );
@@ -371,7 +369,7 @@ public class EditTitelDialog extends JDialog {
 
 		// Do dialog
 		EditBoekDialog editBoekDialog =
-		    new EditBoekDialog( connection, thisDialog, selectedBoekId );
+		    new EditBoekDialog( connection, EditTitelDialog.this, selectedBoekId );
 
 		if ( editBoekDialog.boekUpdated( ) ) {
 		    // Setup the boek combo box again
@@ -481,7 +479,7 @@ public class EditTitelDialog extends JDialog {
 	vertalersPersoonTableModel.showTable( defaultVertalersId );
 
 	// Setup a JComboBox with the results of the query on vertalers
-	vertalersComboBox = new VertalersComboBox( connection, thisDialog, defaultVertalersId );
+	vertalersComboBox = new VertalersComboBox( connection, this, defaultVertalersId );
 	constraints.gridx = 0;
 	constraints.gridy = 14;
 	constraints.gridwidth = 1;
@@ -500,7 +498,7 @@ public class EditTitelDialog extends JDialog {
 		if ( vertalersComboBox.newVertalersSelected( ) ) {
 		    // Insert new vertalers record
 		    EditVertalersDialog editVertalersDialog =
-			new EditVertalersDialog( connection, thisDialog, vertalersFilterString );
+			new EditVertalersDialog( connection, EditTitelDialog.this, vertalersFilterString );
 
 		    // Check if a new vertalers record has been inserted
 		    if ( editVertalersDialog.vertalersUpdated( ) ) {
@@ -544,7 +542,7 @@ public class EditTitelDialog extends JDialog {
 
 		// Check if vertalers has been selected
 		if ( selectedVertalersId == 0 ) {
-		    JOptionPane.showMessageDialog( thisDialog,
+		    JOptionPane.showMessageDialog( EditTitelDialog.this,
 						   "Geen vertalers geselecteerd",
 						   "Edit titel error",
 						   JOptionPane.ERROR_MESSAGE );
@@ -553,7 +551,7 @@ public class EditTitelDialog extends JDialog {
 
 		// Do dialog
 		EditVertalersDialog editVertalersDialog =
-		    new EditVertalersDialog( connection, thisDialog, selectedVertalersId );
+		    new EditVertalersDialog( connection, EditTitelDialog.this, selectedVertalersId );
 
 		if ( editVertalersDialog.vertalersUpdated( ) ) {
 		    // Show the selected vertalers

@@ -12,77 +12,76 @@ import java.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.table.*;
 
 public class EditBoekDialog {
-    final private Logger logger = Logger.getLogger( "boeken.gui.EditBoekDialog" );
+    final private Logger logger = Logger.getLogger( EditBoekDialog.class.getCanonicalName() );
 
-    Connection connection;
-    Object parentObject;
-    JDialog dialog;
+    private final Connection connection;
+    private final Object parentObject;
 
-    int boekId = 0;
-    String defaultBoekString = "";
-    JTextField boekTextField;
+    private JDialog dialog;
 
-    int defaultUitgeverId = 0;
-    UitgeverComboBox uitgeverComboBox;
-    String uitgeverFilterString = null;
+    private int boekId = 0;
+    private String defaultBoekString = "";
+    private JTextField boekTextField;
 
-    JLabel isbn1Label = null;
-    JLabel isbn2Label = null;
+    private int defaultUitgeverId = 0;
+    private UitgeverComboBox uitgeverComboBox;
+    private String uitgeverFilterString = null;
 
-    String defaultIsbn3String = "";
-    JTextField isbn3TextField;
-    String defaultIsbn4String = "";
-    JTextField isbn4TextField;
+    private JLabel isbn1Label = null;
+    private JLabel isbn2Label = null;
 
-    int defaultPaginas = 0;
-    JSpinner paginasSpinner;
+    private String defaultIsbn3String = "";
+    private JTextField isbn3TextField;
+    private String defaultIsbn4String = "";
+    private JTextField isbn4TextField;
 
-    int defaultKaftId = 0;
-    JComboBox kaftComboBox = new JComboBox( );
-    Map kaftMap = new HashMap( );
+    private int defaultPaginas = 0;
+    private JSpinner paginasSpinner;
 
-    int defaultStatusId = 0;
-    StatusComboBox statusComboBox;
+    private int defaultKaftId = 0;
+    private JComboBox<String> kaftComboBox = new JComboBox<String>( );
+    private Map<String, Object> kaftMap = new HashMap<>( );
 
-    int defaultTypeId = 0;
-    TypeComboBox typeComboBox;
+    private int defaultStatusId = 0;
+    private StatusComboBox statusComboBox;
 
-    int defaultBundelId = 0;
-    JComboBox bundelComboBox = new JComboBox( );
-    Map bundelMap = new HashMap( );
+    private int defaultTypeId = 0;
+    private TypeComboBox typeComboBox;
 
-    int defaultLabelId = 0;
-    LabelComboBox labelComboBox;
-    String labelFilterString = null;
-    String newLabelString = null;
+    private int defaultBundelId = 0;
+    private JComboBox<String> bundelComboBox = new JComboBox<String>( );
+    private Map<String, Object> bundelMap = new HashMap<>( );
 
-    Date defaultAanschafDatumDate;
-    JSpinner aanschafDatumSpinner;
+    private int defaultLabelId = 0;
+    private LabelComboBox labelComboBox;
+    private String labelFilterString = null;
+    private String newLabelString = null;
 
-    Date defaultVerwijderdDatumDate;
+    private Date defaultAanschafDatumDate;
+    private JSpinner aanschafDatumSpinner;
 
-    String defaultOpmerkingenString;
-    JTextField opmerkingenTextField;
+    private Date defaultVerwijderdDatumDate;
 
-    EditorsComboBox editorsComboBox;
-    String editorsFilterString = null;
+    private String defaultOpmerkingenString;
+    private JTextField opmerkingenTextField;
 
-    EditorsPersoonTableModel editorsPersoonTableModel;
-    JTable editorsPersoonTable;
-    String defaultEditorsString;
-    int defaultEditorsId = 0;
+    private EditorsComboBox editorsComboBox;
+    private String editorsFilterString = null;
+
+    private EditorsPersoonTableModel editorsPersoonTableModel;
+    private String defaultEditorsString;
+    private int defaultEditorsId = 0;
 
     int nUpdate = 0;
 
-    final String insertBoekActionCommand = "insertBoek";
-    final String updateBoekActionCommand = "updateBoek";
+    private final String insertBoekActionCommand = "insertBoek";
+    private final String updateBoekActionCommand = "updateBoek";
 
     // Pattern to find a single quote in the titel, to be replaced
     // with escaped quote (the double slashes are really necessary)
-    final Pattern quotePattern = Pattern.compile( "\\'" );
+    private final Pattern quotePattern = Pattern.compile( "\\'" );
 
 
     // Constructor for inserting a book
@@ -103,7 +102,7 @@ public class EditBoekDialog {
 			   int	      defaultTypeId,
 			   int	      defaultUitgeverId,
 			   int	      defaultStatusId ) {
-	this.connection = connection;
+        this.connection = connection;
 	this.parentObject = parentObject;
 	this.defaultBoekString = defaultBoekString;
 	this.defaultTypeId = defaultTypeId;
@@ -158,9 +157,9 @@ public class EditBoekDialog {
     }
 
     // Setup boek dialog
-    void setupBoekDialog( String dialogTitle,
-			  String editBoekButtonText,
-			  String editBoekButtonActionCommand ) {
+    private void setupBoekDialog( String dialogTitle,
+                                  String editBoekButtonText,
+                                  String editBoekButtonActionCommand ) {
 	// Create modal dialog for editing boek record
 	if ( parentObject instanceof JFrame ) {
 	    dialog = new JDialog( ( JFrame )parentObject, dialogTitle, true );
@@ -559,7 +558,7 @@ public class EditBoekDialog {
 	container.add( new JLabel( "Editors tabel:" ), constraints );
 
 	// Setup a table with editors
-	editorsPersoonTable = new JTable( editorsPersoonTableModel );
+        final JTable editorsPersoonTable = new JTable( editorsPersoonTableModel );
 	editorsPersoonTable.setRowSelectionAllowed( false );
 	editorsPersoonTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
 	editorsPersoonTable.getColumnModel( ).getColumn( 0 ).setPreferredWidth( 250 );
@@ -612,7 +611,7 @@ public class EditBoekDialog {
     // Kaft
     ////////////////////////////////////////////////
 
-    void setupKaftComboBox( ) {
+    private void setupKaftComboBox( ) {
 	// Add first empty item
 	kaftComboBox.addItem( "" );
 
@@ -640,7 +639,7 @@ public class EditBoekDialog {
 	}
     }
 
-    int getSelectedKaftId( ) {
+    private int getSelectedKaftId( ) {
 	String kaftString = ( String )kaftComboBox.getSelectedItem( );
 
 	if ( kaftString == null ) return 0;
@@ -650,7 +649,7 @@ public class EditBoekDialog {
 
 	// Get the kaft_id from the map
 	if ( kaftMap.containsKey( kaftString ) ) {
-	    return ( ( Integer )kaftMap.get( kaftString ) ).intValue( );
+	    return (Integer)kaftMap.get( kaftString );
 	}
 
 	return 0;
@@ -661,7 +660,7 @@ public class EditBoekDialog {
     // Bundel
     ////////////////////////////////////////////////
 
-    void setupBundelComboBox( ) {
+    private void setupBundelComboBox( ) {
 	// Add first empty item
 	bundelComboBox.addItem( "" );
 
@@ -688,7 +687,7 @@ public class EditBoekDialog {
 	}
     }
 
-    int getSelectedBundelId( ) {
+    private int getSelectedBundelId( ) {
 	String bundelString = ( String )bundelComboBox.getSelectedItem( );
 
 	if ( bundelString == null ) return 0;
@@ -698,7 +697,7 @@ public class EditBoekDialog {
 
 	// Get the bundel_id from the map
 	if ( bundelMap.containsKey( bundelString ) ) {
-	    return ( ( Integer )bundelMap.get( bundelString ) ).intValue( );
+	    return ( Integer )bundelMap.get( bundelString );
 	}
 
 	return 0;
@@ -719,7 +718,7 @@ public class EditBoekDialog {
 	    return false;
 	}
 
-	int paginas = ( ( Integer )paginasSpinner.getValue( ) ).intValue( );
+	int paginas = ( Integer )paginasSpinner.getValue( );
 	int statusId = statusComboBox.getSelectedStatusId( );
 	if ( ( paginas == 0 ) && ( statusId != 0 ) && ( statusId != 10 ) ) {
 	    JOptionPane.showMessageDialog( dialog,
@@ -843,7 +842,7 @@ public class EditBoekDialog {
 	    addToUpdateString( "boek = '" + quoteMatcher.replaceAll( "\\\\'" ) + "'" );
 	}
 
-	int paginas = ( ( Integer )paginasSpinner.getValue( ) ).intValue( );
+	int paginas = ( Integer )paginasSpinner.getValue( );
 	int statusId = statusComboBox.getSelectedStatusId( );
 	// Check if paginas changed
 	if ( paginas != defaultPaginas ) {
