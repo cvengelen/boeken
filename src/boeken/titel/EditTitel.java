@@ -46,7 +46,7 @@ public class EditTitel extends JInternalFrame {
     private final Pattern quotePattern = Pattern.compile( "\\'" );
 
     public EditTitel(final Connection connection, JFrame parentFrame, int x, int y ) {
-        super("Edit boek", true, true, true, true);
+        super("Edit titel", true, true, true, true);
 
         // Get the container from the internal frame
         final Container container = getContentPane();
@@ -71,6 +71,25 @@ public class EditTitel extends JInternalFrame {
         };
 
         /////////////////////////////////
+        // Text filter focus listener
+        /////////////////////////////////
+        FocusListener textFilterFocusListener = new FocusListener() {
+            public void focusLost(FocusEvent focusEven) {
+                // Setup the titel table
+                titelTableSorter.clearSortingState();
+                titelTableModel.setupTitelTableModel(boekFilterTextField.getText(),
+                                                     titelFilterTextField.getText(),
+                                                     opmerkingenFilterTextField.getText(),
+                                                     selectedAuteursId,
+                                                     selectedOnderwerpId,
+                                                     selectedVormId,
+                                                     selectedTaalId);
+            }
+
+            public void focusGained(FocusEvent focusEven) {}
+        };
+
+        /////////////////////////////////
         // Boek filter string
         /////////////////////////////////
 
@@ -85,6 +104,7 @@ public class EditTitel extends JInternalFrame {
 
         boekFilterTextField = new JTextField( 30 );
         boekFilterTextField.addActionListener( textFilterActionListener );
+        boekFilterTextField.addFocusListener(textFilterFocusListener);
         constraints.insets = new Insets( 20, 5, 5, 600 );
         constraints.gridx = GridBagConstraints.RELATIVE;
         constraints.anchor = GridBagConstraints.WEST;
@@ -106,6 +126,7 @@ public class EditTitel extends JInternalFrame {
 
         titelFilterTextField = new JTextField( 30 );
         titelFilterTextField.addActionListener( textFilterActionListener );
+        titelFilterTextField.addFocusListener(textFilterFocusListener);
         constraints.insets = new Insets( 5, 5, 5, 600 );
         constraints.gridx = GridBagConstraints.RELATIVE;
         constraints.anchor = GridBagConstraints.WEST;
@@ -127,6 +148,7 @@ public class EditTitel extends JInternalFrame {
 
         opmerkingenFilterTextField = new JTextField( 30 );
         opmerkingenFilterTextField.addActionListener( textFilterActionListener );
+        opmerkingenFilterTextField.addFocusListener(textFilterFocusListener);
         constraints.insets = new Insets( 5, 5, 5, 600 );
         constraints.gridx = GridBagConstraints.RELATIVE;
         constraints.anchor = GridBagConstraints.WEST;

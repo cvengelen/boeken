@@ -50,7 +50,9 @@ public class EditAuteursDialog {
 	auteursPersoonTableModel = new AuteursPersoonTableModel( connection );
 	auteursPersoonTable = new JTable( auteursPersoonTableModel );
 
-	setupAuteursDialog( "Insert auteurs: " + auteursString, "Insert",
+	String dialogTitle = "Insert auteurs";
+	if ( auteursString != null ) dialogTitle += " : " + auteursString;
+	setupAuteursDialog( dialogTitle, "Insert",
 			     insertAuteursActionCommand );
     }
 

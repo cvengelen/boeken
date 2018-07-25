@@ -66,6 +66,9 @@ public class EditBoek extends JInternalFrame {
         constraints.anchor = GridBagConstraints.WEST;
 	container.add( boekFilterTextField, constraints );
 
+        /////////////////////////////////
+        // Boek filter action listener
+        /////////////////////////////////
 	boekFilterTextField.addActionListener( ( ActionEvent actionEvent ) -> {
             // Setup the boek table
             boekTableSorter.clearSortingState( );
@@ -73,6 +76,22 @@ public class EditBoek extends JInternalFrame {
                     selectedTypeId,
                     selectedUitgeverId,
                     selectedStatusId );
+        } );
+
+        /////////////////////////////////
+        // Boek filter focus listener
+        /////////////////////////////////
+        boekFilterTextField.addFocusListener( new FocusListener() {
+            public void focusLost(FocusEvent focusEven) {
+                // Setup the boek table
+                boekTableSorter.clearSortingState( );
+                boekTableModel.setupBoekTableModel( boekFilterTextField.getText( ),
+                                                    selectedTypeId,
+                                                    selectedUitgeverId,
+                                                    selectedStatusId );
+            }
+
+            public void focusGained(FocusEvent focusEven) {}
         } );
 
 

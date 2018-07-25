@@ -54,6 +54,16 @@ public class EditLabel extends JInternalFrame {
             labelTableModel.setupLabelTableModel( labelFilterTextField.getText() );
         } );
 
+        labelFilterTextField.addFocusListener( new FocusListener() {
+            public void focusLost(FocusEvent focusEven) {
+                labelTableSorter.clearSortingState();
+                // Setup the label table
+                labelTableModel.setupLabelTableModel( labelFilterTextField.getText() );
+            }
+
+            public void focusGained(FocusEvent focusEven) {}
+        } );
+
 	// Create label table from label table model
 	labelTableModel = new LabelTableModel( connection, EditLabel.this );
 	labelTableSorter = new TableSorter( labelTableModel );

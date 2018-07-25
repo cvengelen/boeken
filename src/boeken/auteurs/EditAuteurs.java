@@ -99,6 +99,16 @@ public class EditAuteurs extends JInternalFrame {
             auteursTableModel.setupAuteursTableModel(auteursFilterTextField.getText());
         });
 
+        auteursFilterTextField.addFocusListener( new FocusListener() {
+            public void focusLost(FocusEvent focusEven) {
+                auteursTableSorter.clearSortingState();
+                // Setup the auteurs table when the auteurs field is modified
+                auteursTableModel.setupAuteursTableModel(auteursFilterTextField.getText());
+            }
+
+            public void focusGained(FocusEvent focusEven) {}
+        } );
+
         // Create auteurs table from auteurs table model
         auteursTableModel = new AuteursTableModel(connection, EditAuteurs.this);
         auteursTableSorter = new TableSorter(auteursTableModel);

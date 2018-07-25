@@ -56,6 +56,16 @@ public class EditUitgever extends JInternalFrame {
 
         } );
 
+        uitgeverFilterTextField.addFocusListener( new FocusListener() {
+            public void focusLost(FocusEvent focusEven) {
+                uitgeverTableSorter.clearSortingState();
+                // Setup the uitgever table
+                uitgeverTableModel.setupUitgeverTableModel( uitgeverFilterTextField.getText( ) );
+            }
+
+            public void focusGained(FocusEvent focusEven) {}
+        } );
+
         // Create uitgever table from uitgever table model
 	uitgeverTableModel = new UitgeverTableModel( connection, this );
 	uitgeverTableSorter = new TableSorter( uitgeverTableModel );

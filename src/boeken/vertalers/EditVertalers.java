@@ -98,6 +98,15 @@ public class EditVertalers extends JInternalFrame {
             vertalersTableModel.setupVertalersTableModel( vertalersFilterTextField.getText() );
         } );
 
+        vertalersFilterTextField.addFocusListener( new FocusListener() {
+            public void focusLost(FocusEvent focusEven) {
+                vertalersTableSorter.clearSortingState();
+                // Setup the vertalers table
+                vertalersTableModel.setupVertalersTableModel( vertalersFilterTextField.getText() );
+            }
+
+            public void focusGained(FocusEvent focusEven) {}
+        } );
 
 	// Create vertalers table from vertalers table model
 	vertalersTableModel = new VertalersTableModel( connection, this );

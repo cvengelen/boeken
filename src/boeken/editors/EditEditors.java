@@ -99,6 +99,16 @@ public class EditEditors extends JInternalFrame {
             editorsTableModel.setupEditorsTableModel(editorsFilterTextField.getText());
         });
 
+        editorsFilterTextField.addFocusListener( new FocusListener() {
+            public void focusLost(FocusEvent focusEven) {
+                editorsTableSorter.clearSortingState();
+                // Setup the editors table
+                editorsTableModel.setupEditorsTableModel(editorsFilterTextField.getText());
+            }
+
+            public void focusGained(FocusEvent focusEven) {}
+        } );
+
         // Create editors table from editors table model
         editorsTableModel = new EditorsTableModel(connection, EditEditors.this);
         editorsTableSorter = new TableSorter(editorsTableModel);

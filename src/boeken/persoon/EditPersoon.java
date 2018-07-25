@@ -95,6 +95,16 @@ public class EditPersoon extends JInternalFrame {
             persoonTableModel.setupPersoonTableModel( persoonFilterTextField.getText() );
         } );
 
+        persoonFilterTextField.addFocusListener( new FocusListener() {
+            public void focusLost(FocusEvent focusEven) {
+                persoonTableSorter.clearSortingState();
+                // Setup the persoon table
+                persoonTableModel.setupPersoonTableModel( persoonFilterTextField.getText() );
+            }
+
+            public void focusGained(FocusEvent focusEven) {}
+        } );
+
         // Create persoon table from persoon table model
 	persoonTableModel = new PersoonTableModel( connection, EditPersoon.this );
 	persoonTableSorter = new TableSorter( persoonTableModel );
