@@ -380,9 +380,9 @@ public class EditTitel extends JInternalFrame {
                         int result = JOptionPane.showConfirmDialog(EditTitel.this,
                                                                    "Data zijn gewijzigd: modificaties opslaan?",
                                                                    "Record is gewijzigd",
-                                                                   JOptionPane.YES_NO_OPTION,
-                                        JOptionPane.QUESTION_MESSAGE,
-                                        null );
+                                                                    JOptionPane.YES_NO_OPTION,
+                                                                    JOptionPane.QUESTION_MESSAGE,
+                                                                   null );
 
                         if ( result == JOptionPane.YES_OPTION ) {
                             // Save the changes in the table model, and in the database
@@ -390,7 +390,7 @@ public class EditTitel extends JInternalFrame {
                                 JOptionPane.showMessageDialog(EditTitel.this,
                                                               "Error: row not saved",
                                                               "Save titel record error",
-                                                              JOptionPane.ERROR_MESSAGE );
+                                                               JOptionPane.ERROR_MESSAGE );
                                 return;
                             }
                         } else {
@@ -442,6 +442,31 @@ public class EditTitel extends JInternalFrame {
         final TitelListSelectionListener titelListSelectionListener = new TitelListSelectionListener( );
         titelListSelectionModel.addListSelectionListener( titelListSelectionListener );
 
+        // Add mouse listener for double click action
+        titelTable.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent mouseEvent) {
+                // Check for double clicks
+                if (mouseEvent.getClickCount() == 2) {
+                    // Get the selected titel key
+                    Point point = mouseEvent.getPoint();
+                    int selectedRow = titelTable.rowAtPoint(point);
+                    TitelKey selectedTitelKey = titelTableModel.getTitelKey( selectedRow );
+
+                    // Open dialog
+                    new EditTitelDialog( connection, parentFrame, selectedTitelKey );
+
+                    // Records may have been modified: setup the table model again
+                    titelTableSorter.clearSortingState( );
+                    titelTableModel.setupTitelTableModel( boekFilterTextField.getText( ),
+                                                          titelFilterTextField.getText( ),
+                                                          opmerkingenFilterTextField.getText( ),
+                                                          selectedAuteursId,
+                                                          selectedOnderwerpId,
+                                                          selectedVormId,
+                                                          selectedTaalId );
+                }
+            }
+        } );
 
         ////////////////////////////////////////////////
         // Add, Edit, Cancel, Save, Delete, Close Buttons

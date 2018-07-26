@@ -319,6 +319,29 @@ public class EditBoek extends JInternalFrame {
 	final BoekListSelectionListener boekListSelectionListener = new BoekListSelectionListener( );
 	boekListSelectionModel.addListSelectionListener( boekListSelectionListener );
 
+        // Add mouse listener for double click action
+        boekTable.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent mouseEvent) {
+                // Check for double clicks
+                if (mouseEvent.getClickCount() == 2) {
+                    // Get the selected boek id
+                    Point point = mouseEvent.getPoint();
+                    int selectedRow = boekTable.rowAtPoint(point);
+                    final int selectedBoekId = boekTableModel.getBoekId( selectedRow );
+
+                    // Open dialog
+                    new EditBoekDialog( connection, parentFrame, selectedBoekId );
+
+                    // Records may have been modified: setup the table model again
+                    boekTableSorter.clearSortingState( );
+                    boekTableModel.setupBoekTableModel( boekFilterTextField.getText( ),
+                                                        selectedTypeId,
+                                                        selectedUitgeverId,
+                                                        selectedStatusId );
+                }
+            }
+        } );
+
 	// Class to handle button actions: uses boekListSelectionListener
 	class ButtonActionListener implements ActionListener {
 	    public void actionPerformed( ActionEvent actionEvent ) {
