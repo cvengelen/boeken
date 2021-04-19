@@ -3,6 +3,7 @@
 // Description:	Boeken main program
 // Author:	Chris van Engelen
 // History:	2017/12/26: Initial version
+//              2021/4/19: update JDBC driver
 
 package boeken;
 
@@ -22,9 +23,8 @@ import java.util.logging.Logger;
 public class Boeken extends JFrame implements ActionListener {
     private final static Logger logger = Logger.getLogger( boeken.Main.class.getCanonicalName() );
 
-    private JDesktopPane desktopPane;
+    private final JDesktopPane desktopPane;
     private Connection connection;
-    private String password;
 
     private int openFrameCount = 0;
     private static final int xOffset = 30, yOffset = 30;
@@ -46,7 +46,7 @@ public class Boeken extends JFrame implements ActionListener {
 
         try {
             // Load the MySQL JDBC driver
-            Class.forName( "com.mysql.jdbc.Driver" );
+            Class.forName( "com.mysql.cj.jdbc.Driver" );
         } catch ( ClassNotFoundException classNotFoundException ) {
             logger.severe( "ClassNotFoundException: " + classNotFoundException.getMessage() );
             System.exit( 1 );
@@ -55,7 +55,7 @@ public class Boeken extends JFrame implements ActionListener {
         try {
             // Get the password for the boeken account, which gives access to schema boeken.
             final boeken.gui.PasswordPanel passwordPanel = new boeken.gui.PasswordPanel();
-            password = passwordPanel.getPassword();
+            final String password = passwordPanel.getPassword();
             if (password == null) {
                 logger.info("No password");
                 System.err.println("Geen password gegeven");
@@ -139,7 +139,7 @@ public class Boeken extends JFrame implements ActionListener {
         menuItem.addActionListener(this);
         menuBar.add(menuItem);
 
-        // Edit persoon
+        // Edit uitgever
         menuItem = new JMenuItem("Uitgever", KeyEvent.VK_U);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.ALT_MASK));
         menuItem.setActionCommand("editUitgever");
@@ -147,7 +147,7 @@ public class Boeken extends JFrame implements ActionListener {
         menuItem.addActionListener(this);
         menuBar.add(menuItem);
 
-        // Edit persoon
+        // Edit vertalers
         menuItem = new JMenuItem("Vertalers", KeyEvent.VK_V);
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.ALT_MASK));
         menuItem.setActionCommand("editVertalers");
@@ -200,7 +200,7 @@ public class Boeken extends JFrame implements ActionListener {
             openFrameCount++;
         } catch ( java.beans.PropertyVetoException propertyVetoException ) {
             JOptionPane.showMessageDialog( this, propertyVetoException.getMessage( ),
-                    "The internal frame could not be dusplayed",
+                    "The internal frame could not be displayed",
                     JOptionPane.ERROR_MESSAGE);
             logger.severe( propertyVetoException.getMessage() );
         }

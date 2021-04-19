@@ -1,2 +1,4 @@
+#!/bin/bash
+
 # Start boeken.Boeken
-java -cp /Users/cvengelen/java/boeken/build/boeken.jar:${JAVA_LIBS}/table.jar -Djava.util.logging.config.file=/Users/cvengelen/java/boeken/resources/logging.properties boeken.Boeken
+java -cp /Users/cvengelen/java/boeken/build/boeken.jar:${JAVA_LIBS}/table.jar:${JAVA_LIBS}/mysql-connector-java-8.0.23.jar -Djava.util.logging.config.file=/Users/cvengelen/java/boeken/resources/logging.properties boeken.Boeken
